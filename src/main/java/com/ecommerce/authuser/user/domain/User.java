@@ -2,6 +2,7 @@ package com.ecommerce.authuser.user.domain;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
+@Getter
 public class User {
 
     @Id
@@ -117,77 +119,5 @@ public class User {
     @PreUpdate
     private void preUpdate() {
         updatedAt = Instant.now();
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getEmailNormalized() {
-        return emailNormalized;
-    }
-
-    public Instant getEmailVerifiedAt() {
-        return emailVerifiedAt;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getPhoneNormalized() {
-        return phoneNormalized;
-    }
-
-    public Instant getPhoneVerifiedAt() {
-        return phoneVerifiedAt;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public short getFailedLoginCount() {
-        return failedLoginCount;
-    }
-
-    public Instant getFailedLoginWindowStartedAt() {
-        return failedLoginWindowStartedAt;
-    }
-
-    public Instant getLockedUntil() {
-        return lockedUntil;
-    }
-
-    public Instant getPasswordChangedAt() {
-        return passwordChangedAt;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public Instant getDeletedAt() {
-        return deletedAt;
     }
 }
