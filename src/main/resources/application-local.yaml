@@ -18,6 +18,8 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+        type:
+          preferred_uuid_jdbc_type: BINARY
 
   flyway:
     enabled: true
