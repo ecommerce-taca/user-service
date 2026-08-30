@@ -4,7 +4,7 @@ server:
 spring:
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&tinyInt1isBit=false}
     username: ${DB_USERNAME:ecommerce}
     password: ${DB_PASSWORD:ecommerce}
 
