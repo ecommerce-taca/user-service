@@ -4,12 +4,14 @@ import com.ecommerce.authuser.common.id.UuidV7Generator;
 import com.ecommerce.authuser.common.persistence.BooleanToTinyIntConverter;
 import com.ecommerce.authuser.user.domain.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "addresses")
+@Getter
 public class Address {
 
     @Id
@@ -128,61 +130,5 @@ public class Address {
         this.deletedAt = Instant.now();
 
         this.defaultAddress = false;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getLine1() {
-        return line1;
-    }
-
-    public String getLine2() {
-        return line2;
-    }
-
-    public String getWard() {
-        return ward;
-    }
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public String getProvince() {
-        return province;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public boolean isDefaultAddress() {
-        return Boolean.TRUE.equals(defaultAddress);
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public Instant getDeletedAt() {
-        return deletedAt;
     }
 }
