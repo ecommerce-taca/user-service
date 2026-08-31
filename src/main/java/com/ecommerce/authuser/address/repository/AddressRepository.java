@@ -1,15 +1,19 @@
 package com.ecommerce.authuser.address.repository;
 
 import com.ecommerce.authuser.address.domain.Address;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AddressRepository extends JpaRepository<Address, UUID> {
 
-    List<Address> findAllByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDesc(UUID userId);
+    Page<Address> findAllByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDesc(
+            UUID userId,
+            Pageable pageable
+    );
 
     Optional<Address> findByIdAndUser_IdAndDeletedAtIsNull(
             UUID addressId,
@@ -17,6 +21,8 @@ public interface AddressRepository extends JpaRepository<Address, UUID> {
     );
 
     Optional<Address> findByUser_IdAndDefaultAddressTrueAndDeletedAtIsNull(UUID userId);
+
+    Optional<Address> findFirstByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDesc(UUID userId);
 
     long countByUser_IdAndDeletedAtIsNull(UUID userId);
 }
