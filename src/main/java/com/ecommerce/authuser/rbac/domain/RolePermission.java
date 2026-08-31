@@ -1,12 +1,14 @@
 package com.ecommerce.authuser.rbac.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "role_permissions")
+@Getter
 public class RolePermission {
 
     @EmbeddedId
@@ -56,25 +58,5 @@ public class RolePermission {
         if (grantedAt == null) {
             grantedAt = Instant.now();
         }
-    }
-
-    public RolePermissionId getId() {
-        return id;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public Permission getPermission() {
-        return permission;
-    }
-
-    public Instant getGrantedAt() {
-        return grantedAt;
-    }
-
-    public UUID getGrantedBy() {
-        return grantedBy;
     }
 }

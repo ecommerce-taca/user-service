@@ -2,6 +2,7 @@ package com.ecommerce.authuser.rbac.domain;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import java.util.UUID;
                 )
         }
 )
+@Getter
 public class Permission {
 
     @Id
@@ -64,25 +66,5 @@ public class Permission {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getPermissionKey() {
-        return permissionKey;
-    }
-
-    public ScopeType getScopeType() {
-        return scopeType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
     }
 }

@@ -3,6 +3,7 @@ package com.ecommerce.authuser.rbac.domain;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 import com.ecommerce.authuser.common.persistence.BooleanToTinyIntConverter;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
                 )
         }
 )
+@Getter
 public class Role {
 
     @Id
@@ -86,31 +88,8 @@ public class Role {
         updatedAt = Instant.now();
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public String getRoleKey() {
-        return roleKey;
-    }
-
-    public ScopeType getScopeType() {
-        return scopeType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public boolean isSystem() {
         return Boolean.TRUE.equals(system);
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
 }

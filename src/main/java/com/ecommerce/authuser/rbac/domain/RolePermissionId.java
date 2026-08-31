@@ -2,12 +2,14 @@ package com.ecommerce.authuser.rbac.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
 @Embeddable
+@Getter
 public class RolePermissionId implements Serializable {
 
     @Column(name = "role_id", nullable = false, columnDefinition = "BINARY(16)")
