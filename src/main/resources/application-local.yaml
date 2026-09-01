@@ -30,3 +30,6 @@ spring:
 auth:
   outbox:
     encryption-key-base64: ${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}
+
+  audit:
+    hash-key-base64: ${AUTH_AUDIT_HASH_KEY_BASE64}

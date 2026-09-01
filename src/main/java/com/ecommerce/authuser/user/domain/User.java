@@ -4,6 +4,7 @@ import com.ecommerce.authuser.common.id.UuidV7Generator;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -13,6 +14,11 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 public class User {
+    private static final int MAX_LOGIN_FAILURES = 5;
+
+    private static final Duration LOGIN_FAILURE_WINDOW = Duration.ofMinutes(15);
+
+    private static final Duration LOGIN_LOCK_DURATION = Duration.ofMinutes(15);
 
     @Id
     @Column(
@@ -138,10 +144,56 @@ public class User {
         }
 
         status = UserStatus.ACTIVE;
+        lockedUntil = null;
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
+    }
 
+    public boolean isLoginLocked(Instant now) {
+        Objects.requireNonNull(now);
+
+        return status == UserStatus.LOCKED
+                && lockedUntil != null
+                && lockedUntil.isAfter(now);
+    }
+
+    public void recordLoginFailure(Instant now) {
+        Objects.requireNonNull(now);
+
+        if (status == UserStatus.SUSPENDED
+                || status == UserStatus.DELETED) {
+
+            throw new IllegalStateException(
+                    "Inactive user cannot record login failure"
+            );
+        }
+
+        if (failedLoginWindowStartedAt == null
+                || failedLoginWindowStartedAt.plus(LOGIN_FAILURE_WINDOW).isBefore(now)
+                || failedLoginWindowStartedAt.plus(LOGIN_FAILURE_WINDOW).equals(now)) {
+
+            failedLoginWindowStartedAt = now;
+            failedLoginCount = 1;
+        } else {
+            failedLoginCount++;
+        }
+
+        if (failedLoginCount >= MAX_LOGIN_FAILURES) {
+
+            status = UserStatus.LOCKED;
+
+            lockedUntil = now.plus(LOGIN_LOCK_DURATION);
+        }
+    }
+
+    public void recordLoginSuccess() {
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
         lockedUntil = null;
 
-        failedLoginCount = 0;
+        if (status == UserStatus.LOCKED) {
+            status = UserStatus.ACTIVE;
+        }
     }
 
     public static User registerBuyer(

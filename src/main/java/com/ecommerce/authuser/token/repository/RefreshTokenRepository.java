@@ -33,4 +33,28 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
             UUID userId,
             Instant now
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select token
+        from RefreshToken token
+        where token.familyId = :familyId
+        order by token.issuedAt asc
+        """)
+    List<RefreshToken> findAllByFamilyIdForUpdate(
+            @Param("familyId") UUID familyId
+    );
+
+    @Query("""
+        select new com.ecommerce.authuser.token.repository.RefreshTokenLookup(
+            token.id,
+            token.user.id,
+            token.familyId
+        )
+        from RefreshToken token
+        where token.tokenHash = :tokenHash
+        """)
+    Optional<RefreshTokenLookup> findLookupByTokenHash(
+            @Param("tokenHash") String tokenHash
+    );
 }
