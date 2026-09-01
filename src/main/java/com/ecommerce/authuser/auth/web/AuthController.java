@@ -32,6 +32,8 @@ public class AuthController {
 
     private final EmailVerificationService emailVerificationService;
 
+    private final EmailVerificationResendService emailVerificationResendService;
+
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
             @Valid @RequestBody SignupRequest request,
@@ -220,6 +222,33 @@ public class AuthController {
                 );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/email/resend")
+    public ResponseEntity<EmailResendResponse>
+    resendVerificationEmail(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody(required = false) EmailResendRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId,
+            HttpServletRequest httpRequest
+    ) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        EmailResendResult result = emailVerificationResendService.resend(
+                new EmailResendCommand(
+                        userId,
+                        httpRequest.getRemoteAddr()
+                )
+        );
+
+        EmailResendResponse response = new EmailResendResponse(
+                new EmailResendResponse.Data(true, result.expiresAt()),
+                new EmailResendResponse.Meta(resolveRequestId(requestId)));
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
     }
 
     private String resolveRequestId(String requestId) {

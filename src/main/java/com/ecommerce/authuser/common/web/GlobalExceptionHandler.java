@@ -135,6 +135,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(VerificationAlreadyCompleteException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationAlreadyComplete(VerificationAlreadyCompleteException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_VERIFICATION_ALREADY_COMPLETE",
+                "Email đã được xác thực."
+        );
+    }
+
+    @ExceptionHandler(ResendLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleResendLimitExceeded(ResendLimitExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_RESEND_LIMIT_EXCEEDED",
+                "Đã vượt quá số lần gửi lại email xác thực cho phép."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

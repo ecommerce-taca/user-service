@@ -69,4 +69,21 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
     Optional<VerificationToken> findByIdForUpdate(
             @Param("tokenId") UUID tokenId
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select token
+        from VerificationToken token
+        where token.user.id = :userId
+            and token.purpose = :purpose
+            and token.channel = :channel
+            and token.usedAt is null
+            and token.revokedAt is null
+        order by token.createdAt asc
+        """)
+    List<VerificationToken> findActiveForUpdate(
+            @Param("userId") UUID userId,
+            @Param("purpose") VerificationPurpose purpose,
+            @Param("channel") VerificationChannel channel
+    );
 }

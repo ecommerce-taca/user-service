@@ -232,4 +232,26 @@ public class User {
 
         emailVerifiedAt = now;
     }
+
+    public void verifyPhone(
+            String phone,
+            String phoneNormalized,
+            Instant now
+    ) {
+        Objects.requireNonNull(phone);
+        Objects.requireNonNull(phoneNormalized);
+        Objects.requireNonNull(now);
+
+        if (phoneVerifiedAt != null
+                && Objects.equals(this.phoneNormalized, phoneNormalized)
+        ) {
+            throw new IllegalStateException(
+                    "Phone is already verified"
+            );
+        }
+
+        this.phone = phone;
+        this.phoneNormalized = phoneNormalized;
+        this.phoneVerifiedAt = now;
+    }
 }
