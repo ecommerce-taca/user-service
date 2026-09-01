@@ -45,4 +45,26 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("now") Instant now,
             Pageable pageable
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select user
+        from User user
+        where user.emailNormalized = :emailNormalized
+            and user.deletedAt is null
+        """)
+    Optional<User> findByEmailNormalizedForUpdate(
+            @Param("emailNormalized") String emailNormalized
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select user
+        from User user
+        where user.phoneNormalized = :phoneNormalized
+            and user.deletedAt is null
+        """)
+    Optional<User> findByPhoneNormalizedForUpdate(
+            @Param("phoneNormalized") String phoneNormalized
+    );
 }
