@@ -28,7 +28,8 @@ public class SecurityConfig {
                                         HttpMethod.POST,
                                         "/api/v1/auth/signup",
                                         "/api/v1/auth/signin",
-                                        "/api/v1/auth/refresh"
+                                        "/api/v1/auth/refresh",
+                                        "/api/v1/auth/email/verify"
                                 )
                                 .permitAll()
                                 .anyRequest()

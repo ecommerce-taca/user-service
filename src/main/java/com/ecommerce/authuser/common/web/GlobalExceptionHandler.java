@@ -126,6 +126,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_VERIFICATION_INVALID",
+                "Token xác thực không hợp lệ hoặc đã hết hạn."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

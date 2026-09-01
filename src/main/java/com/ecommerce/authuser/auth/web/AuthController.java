@@ -30,10 +30,11 @@ public class AuthController {
 
     private final SignoutService signoutService;
 
+    private final EmailVerificationService emailVerificationService;
+
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
             @Valid @RequestBody SignupRequest request,
-
             @RequestHeader(name = "X-Request-ID", required = false) String requestId
     ) {
 
@@ -193,6 +194,32 @@ public class AuthController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<EmailVerificationResponse> verifyEmail(
+            @Valid @RequestBody EmailVerificationRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+
+        EmailVerificationResult result = emailVerificationService.verify(
+                new EmailVerificationCommand(request.token())
+        );
+
+        EmailVerificationResponse response =
+                new EmailVerificationResponse(
+                        new EmailVerificationResponse.Data(
+                                result.userId(),
+                                true,
+                                result.verifiedAt()
+                        ),
+
+                        new EmailVerificationResponse.Meta(
+                                resolveRequestId(requestId)
+                        )
+                );
+
+        return ResponseEntity.ok(response);
     }
 
     private String resolveRequestId(String requestId) {

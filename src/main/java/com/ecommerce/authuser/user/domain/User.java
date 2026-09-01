@@ -220,4 +220,16 @@ public class User {
 
         return user;
     }
+
+    public void verifyEmail(Instant now) {
+        Objects.requireNonNull(now);
+
+        if (emailVerifiedAt != null) {
+            throw new IllegalStateException(
+                    "Email is already verified"
+            );
+        }
+
+        emailVerifiedAt = now;
+    }
 }
