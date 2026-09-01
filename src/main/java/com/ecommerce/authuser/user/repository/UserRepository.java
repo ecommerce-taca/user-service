@@ -2,11 +2,14 @@ package com.ecommerce.authuser.user.repository;
 
 import com.ecommerce.authuser.user.domain.User;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,4 +31,18 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             and user.deletedAt is null
         """)
     Optional<User> findByIdForUpdate(@Param("userId") UUID userId);
+
+    @Query("""
+        select u
+        from User u
+        where u.status = com.ecommerce.authuser.user.domain.UserStatus.LOCKED
+            and u.lockedUntil is not null
+            and u.lockedUntil <= :now
+            and u.deletedAt is null
+        order by u.lockedUntil asc
+        """)
+    List<User> findUnlockCandidates(
+            @Param("now") Instant now,
+            Pageable pageable
+    );
 }
