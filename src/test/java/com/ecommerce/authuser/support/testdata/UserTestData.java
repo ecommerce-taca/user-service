@@ -2,70 +2,69 @@ package com.ecommerce.authuser.support.testdata;
 
 import com.ecommerce.authuser.support.builder.UserTestBuilder;
 import com.ecommerce.authuser.user.domain.User;
-
 import java.time.LocalDate;
 
 public final class UserTestData {
+        private UserTestData() {
+        }
 
-    public static final String DEFAULT_PASSWORD =
-            "TestPassword123!";
+        public static User defaultUser() {
+                return UserTestBuilder.aUser()
+                                .withEmail("user@test.com")
+                                .withEmailNormalized("user@test.com")
+                                .withFullName("Test User")
+                                .build();
+        }
 
-    public static final String DEFAULT_EMAIL =
-            "user@test.com";
+        public static User buyer() {
+                return UserTestBuilder.buyer()
+                                .build();
+        }
 
-    public static final String DEFAULT_PHONE =
-            "0901234567";
+        public static User user(
+                        String email,
+                        String fullName) {
+                return UserTestBuilder.aUser()
+                                .withEmail(email)
+                                .withEmailNormalized(email)
+                                .withFullName(fullName)
+                                .build();
+        }
 
-    private UserTestData() {
-    }
+        public static User userWithPhone(
+                        String email,
+                        String phone,
+                        String fullName) {
+                return UserTestBuilder.aUser()
+                                .withEmail(email)
+                                .withEmailNormalized(email)
+                                .withPhone(phone)
+                                .withPhoneNormalized(phone)
+                                .withFullName(fullName)
+                                .build();
+        }
 
-    public static UserTestBuilder defaultUser() {
-        return UserTestBuilder.aUser()
-                .withEmail(DEFAULT_EMAIL)
-                .withEmailNormalized(DEFAULT_EMAIL)
-                .withFullName("Test User");
-    }
+        public static User userWithDateOfBirth(
+                        String email,
+                        String fullName,
+                        LocalDate dateOfBirth) {
+                return UserTestBuilder.aUser()
+                                .withEmail(email)
+                                .withEmailNormalized(email)
+                                .withFullName(fullName)
+                                .withDateOfBirth(dateOfBirth)
+                                .build();
+        }
 
-    public static UserTestBuilder activeUser() {
-        return UserTestBuilder.activeUser()
-                .withEmail(DEFAULT_EMAIL)
-                .withEmailNormalized(DEFAULT_EMAIL)
-                .withFullName("Test User");
-    }
-
-    public static UserTestBuilder buyer() {
-        return UserTestBuilder.buyer()
-                .withFullName("Test Buyer");
-    }
-
-    public static UserTestBuilder userWithPhone() {
-        return UserTestBuilder.aUser()
-                .withEmail("phone-user@test.com")
-                .withEmailNormalized("phone-user@test.com")
-                .withPhone(DEFAULT_PHONE)
-                .withPhoneNormalized(DEFAULT_PHONE)
-                .withFullName("Phone Test User");
-    }
-
-    public static UserTestBuilder userWithDateOfBirth() {
-        return UserTestBuilder.aUser()
-                .withEmail("dob-user@test.com")
-                .withEmailNormalized("dob-user@test.com")
-                .withFullName("Date Of Birth User")
-                .withDateOfBirth(
-                        LocalDate.of(2000, 1, 15)
-                );
-    }
-
-    public static UserTestBuilder user(
-            String email,
-            String fullName
-    ) {
-        return UserTestBuilder.aUser()
-                .withEmail(email)
-                .withEmailNormalized(email)
-                .withFullName(fullName);
-    }
+        public static User userWithPasswordHash(
+                        String email,
+                        String fullName,
+                        String passwordHash) {
+                return UserTestBuilder.aUser()
+                                .withEmail(email)
+                                .withEmailNormalized(email)
+                                .withFullName(fullName)
+                                .withPasswordHash(passwordHash)
+                                .build();
+        }
 }
-
-
