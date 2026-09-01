@@ -1,22 +1,31 @@
 package com.ecommerce.authuser.support.builder;
 
 import com.ecommerce.authuser.user.domain.User;
+
 import java.time.LocalDate;
 
 public final class UserTestBuilder {
 
     /*
-     * BCrypt hash dùng cho test
-     * Plain-text password tương ứng sẽ được quy ước trong TestData sau này
+     * BCrypt hash dùng cho test.
+     * Plain-text password tương ứng được quy ước trong UserTestData.
      */
     private String passwordHash =
             "$2a$10$7EqJtq98hPqEX7fNZaFWoO6W0m1Y6fQm1M0Q6M4q7YQ4J8JxV7Q5K";
 
-    private String email = "user@test.com";
-    private String emailNormalized = "user@test.com";
+    private String email =
+            "user@test.com";
+
+    private String emailNormalized =
+            "user@test.com";
+
     private String phone;
+
     private String phoneNormalized;
-    private String fullName = "Test User";
+
+    private String fullName =
+            "Test User";
+
     private LocalDate dateOfBirth;
 
     private UserTestBuilder() {
