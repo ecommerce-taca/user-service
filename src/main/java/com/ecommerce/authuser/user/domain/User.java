@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -119,5 +120,27 @@ public class User {
     @PreUpdate
     private void preUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public boolean canUnlock(Instant now) {
+        Objects.requireNonNull(now);
+
+        return status == UserStatus.LOCKED
+                && lockedUntil != null
+                && !lockedUntil.isAfter(now);
+    }
+
+    public void unlock(Instant now) {
+        if (!canUnlock(now)) {
+            throw new IllegalStateException(
+                    "User cannot be unlocked"
+            );
+        }
+
+        status = UserStatus.ACTIVE;
+
+        lockedUntil = null;
+
+        failedLoginCount = 0;
     }
 }
