@@ -30,10 +30,13 @@ public class AuthController {
 
     private final SignoutService signoutService;
 
+    private final EmailVerificationService emailVerificationService;
+
+    private final EmailVerificationResendService emailVerificationResendService;
+
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
             @Valid @RequestBody SignupRequest request,
-
             @RequestHeader(name = "X-Request-ID", required = false) String requestId
     ) {
 
@@ -193,6 +196,59 @@ public class AuthController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<EmailVerificationResponse> verifyEmail(
+            @Valid @RequestBody EmailVerificationRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+
+        EmailVerificationResult result = emailVerificationService.verify(
+                new EmailVerificationCommand(request.token())
+        );
+
+        EmailVerificationResponse response =
+                new EmailVerificationResponse(
+                        new EmailVerificationResponse.Data(
+                                result.userId(),
+                                true,
+                                result.verifiedAt()
+                        ),
+
+                        new EmailVerificationResponse.Meta(
+                                resolveRequestId(requestId)
+                        )
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/email/resend")
+    public ResponseEntity<EmailResendResponse>
+    resendVerificationEmail(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody(required = false) EmailResendRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId,
+            HttpServletRequest httpRequest
+    ) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        EmailResendResult result = emailVerificationResendService.resend(
+                new EmailResendCommand(
+                        userId,
+                        httpRequest.getRemoteAddr()
+                )
+        );
+
+        EmailResendResponse response = new EmailResendResponse(
+                new EmailResendResponse.Data(true, result.expiresAt()),
+                new EmailResendResponse.Meta(resolveRequestId(requestId)));
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
     }
 
     private String resolveRequestId(String requestId) {

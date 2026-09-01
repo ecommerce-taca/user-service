@@ -126,6 +126,33 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_VERIFICATION_INVALID",
+                "Token xác thực không hợp lệ hoặc đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(VerificationAlreadyCompleteException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationAlreadyComplete(VerificationAlreadyCompleteException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_VERIFICATION_ALREADY_COMPLETE",
+                "Email đã được xác thực."
+        );
+    }
+
+    @ExceptionHandler(ResendLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleResendLimitExceeded(ResendLimitExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_RESEND_LIMIT_EXCEEDED",
+                "Đã vượt quá số lần gửi lại email xác thực cho phép."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

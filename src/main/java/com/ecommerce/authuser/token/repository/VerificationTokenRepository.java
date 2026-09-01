@@ -4,7 +4,11 @@ import com.ecommerce.authuser.token.domain.VerificationChannel;
 import com.ecommerce.authuser.token.domain.VerificationPurpose;
 import com.ecommerce.authuser.token.domain.VerificationToken;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
@@ -38,5 +42,48 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
             VerificationPurpose purpose,
             VerificationChannel channel,
             Instant createdAfter
+    );
+
+    @Query("""
+        select new com.ecommerce.authuser.token.repository.VerificationTokenLookup(
+            token.id,
+            token.user.id
+        )
+        from VerificationToken token
+        where token.tokenHash = :tokenHash
+            and token.channel = :channel
+            and token.purpose = :purpose
+        """)
+    Optional<VerificationTokenLookup> findLookup(
+            @Param("tokenHash") String tokenHash,
+            @Param("channel") VerificationChannel channel,
+            @Param("purpose") VerificationPurpose purpose
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select token
+        from VerificationToken token
+        where token.id = :tokenId
+        """)
+    Optional<VerificationToken> findByIdForUpdate(
+            @Param("tokenId") UUID tokenId
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select token
+        from VerificationToken token
+        where token.user.id = :userId
+            and token.purpose = :purpose
+            and token.channel = :channel
+            and token.usedAt is null
+            and token.revokedAt is null
+        order by token.createdAt asc
+        """)
+    List<VerificationToken> findActiveForUpdate(
+            @Param("userId") UUID userId,
+            @Param("purpose") VerificationPurpose purpose,
+            @Param("channel") VerificationChannel channel
     );
 }

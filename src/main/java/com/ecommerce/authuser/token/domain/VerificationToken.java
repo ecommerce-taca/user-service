@@ -48,6 +48,9 @@ public class VerificationToken {
     @Column(name = "recipient_masked", nullable = false, length = 254)
     private String recipientMasked;
 
+    @Column(name = "recipient_value", length = 254)
+    private String recipientValue;
+
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
@@ -158,5 +161,33 @@ public class VerificationToken {
         }
 
         attemptCount++;
+    }
+
+    public static VerificationToken createPhoneChallenge(
+            User user,
+            String otpHash,
+            String phoneNormalized,
+            String phoneMasked,
+            Instant expiresAt
+    ) {
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(otpHash);
+        Objects.requireNonNull(phoneNormalized);
+        Objects.requireNonNull(phoneMasked);
+        Objects.requireNonNull(expiresAt);
+
+        VerificationToken token = new VerificationToken();
+
+        token.id = UuidV7Generator.generate();
+        token.user = user;
+        token.channel = VerificationChannel.PHONE;
+        token.purpose = VerificationPurpose.PHONE_VERIFY;
+        token.tokenHash = otpHash;
+        token.recipientValue = phoneNormalized;
+        token.recipientMasked = phoneMasked;
+        token.expiresAt = expiresAt;
+        token.attemptCount = 0;
+
+        return token;
     }
 }
