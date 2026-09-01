@@ -1,7 +1,6 @@
 package com.ecommerce.authuser.common.web;
 
-import com.ecommerce.authuser.auth.exception.EmailAlreadyExistsException;
-import com.ecommerce.authuser.auth.exception.PhoneAlreadyExistsException;
+import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import org.springframework.http.HttpStatus;
@@ -52,6 +51,78 @@ public class GlobalExceptionHandler {
                 "AUTH_INVALID_INPUT",
                 "Dữ liệu đầu vào không hợp lệ.",
                 details
+        );
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_INVALID_CREDENTIALS",
+                "Email/số điện thoại hoặc mật khẩu không đúng."
+        );
+    }
+
+    @ExceptionHandler(AccountSuspendedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccountSuspended(AccountSuspendedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "AUTH_ACCOUNT_SUSPENDED",
+                "Tài khoản hiện không thể sử dụng."
+        );
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccountLocked(AccountLockedException ex) {
+        return buildError(
+                HttpStatus.LOCKED,
+                "AUTH_ACCOUNT_LOCKED",
+                "Tài khoản đang tạm khóa. Vui lòng thử lại sau."
+        );
+    }
+
+    @ExceptionHandler(AdminMfaRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminMfaRequired(AdminMfaRequiredException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_MFA_REQUIRED",
+                "Vui lòng xác thực 2FA."
+        );
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_TOKEN_INVALID",
+                "Refresh token không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(ExpiredRefreshTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredRefreshToken(ExpiredRefreshTokenException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_TOKEN_EXPIRED",
+                "Refresh token đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(ReusedRefreshTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleReusedRefreshToken(ReusedRefreshTokenException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_REFRESH_REUSED",
+                "Refresh token đã được sử dụng trước đó."
+        );
+    }
+
+    @ExceptionHandler(MfaStepUpRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaStepUpRequired(MfaStepUpRequiredException ex) {
+        return buildError(
+                HttpStatus.PRECONDITION_REQUIRED,
+                "RBAC_MFA_REQUIRED",
+                "Yêu cầu xác thực lại trước khi đăng xuất tất cả phiên."
         );
     }
 

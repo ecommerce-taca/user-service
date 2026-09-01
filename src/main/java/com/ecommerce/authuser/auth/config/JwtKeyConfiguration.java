@@ -2,8 +2,11 @@ package com.ecommerce.authuser.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.*;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -41,5 +44,45 @@ public class JwtKeyConfiguration {
         return NimbusJwtEncoder
                 .withKeyPair(publicKey, privateKey)
                 .build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(KeyPair jwtKeyPair) {
+        RSAPublicKey publicKey = (RSAPublicKey) jwtKeyPair.getPublic();
+
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
+                .withPublicKey(publicKey)
+                .build();
+
+        OAuth2TokenValidator<Jwt> issuerValidator =
+                JwtValidators.createDefaultWithIssuer("auth-user-service");
+
+        OAuth2TokenValidator<Jwt> audienceValidator =
+                jwt -> {
+                    if (jwt.getAudience()
+                            .contains("taca-api")) {
+
+                        return OAuth2TokenValidatorResult.success();
+                    }
+
+                    OAuth2Error error =
+                            new OAuth2Error(
+                                    "invalid_token",
+                                    "Required audience is missing",
+                                    null
+                            );
+
+                    return OAuth2TokenValidatorResult
+                            .failure(error);
+                };
+
+        decoder.setJwtValidator(
+                new DelegatingOAuth2TokenValidator<>(
+                        issuerValidator,
+                        audienceValidator
+                )
+        );
+
+        return decoder;
     }
 }
