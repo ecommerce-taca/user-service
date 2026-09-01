@@ -143,4 +143,29 @@ public class User {
 
         failedLoginCount = 0;
     }
+
+    public static User registerBuyer(
+            String email,
+            String emailNormalized,
+            String passwordHash,
+            String fullName,
+            String phone,
+            String phoneNormalized
+    ) {
+
+        User user = new User();
+        user.id = UuidV7Generator.generate();
+        user.email = email;
+        user.emailNormalized = emailNormalized;
+        user.emailVerifiedAt = null;
+        user.passwordHash = passwordHash;
+        user.fullName = fullName;
+        user.phone = phone;
+        user.phoneNormalized = phoneNormalized;
+        user.phoneVerifiedAt = null;
+        user.status = UserStatus.ACTIVE;
+        user.failedLoginCount = 0;
+
+        return user;
+    }
 }
