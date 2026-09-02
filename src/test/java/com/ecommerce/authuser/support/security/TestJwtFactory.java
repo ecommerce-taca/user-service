@@ -19,9 +19,9 @@ import java.util.UUID;
 
 public final class TestJwtFactory {
 
-    public static final String ISSUER = "test-auth-user-service";
-
-    public static final String AUDIENCE = "auth-user-service";
+    public static final String ISSUER = "auth-user-service";
+    
+    public static final String AUDIENCE = "taca-api";
 
     private static final String KEY_ID = "test-rsa-key";
 

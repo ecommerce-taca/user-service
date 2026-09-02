@@ -18,6 +18,9 @@ public final class AuditLogTestData {
     public static final String KYC_REJECTED =
             "KYC_REJECTED";
 
+    public static final String AUTH_SIGNOUT =
+            "AUTH_SIGNOUT";
+
     public static final String IP_HASH =
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
@@ -36,7 +39,10 @@ public final class AuditLogTestData {
             Object value
     ) {
         return new HashMap<>(
-                Map.of(key, value)
+                Map.of(
+                        key,
+                        value
+                )
         );
     }
 
