@@ -67,4 +67,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByPhoneNormalizedForUpdate(
             @Param("phoneNormalized") String phoneNormalized
     );
+
+    boolean existsByPhoneNormalizedAndIdNotAndDeletedAtIsNull(
+            String phoneNormalized,
+            UUID id
+    );
 }

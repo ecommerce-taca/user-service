@@ -155,6 +155,10 @@ public class RefreshService {
             throw new ReusedRefreshTokenException();
         }
 
+        if (currentToken.isRevoked()) {
+            throw new InvalidRefreshTokenException();
+        }
+
         if (currentToken.isExpired(now)) {
             currentToken.revoke(TokenRevokeReason.EXPIRED, now);
 

@@ -1,6 +1,9 @@
 package com.ecommerce.authuser.common.web;
 
 import com.ecommerce.authuser.auth.exception.*;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import org.springframework.http.HttpStatus;
@@ -123,6 +126,97 @@ public class GlobalExceptionHandler {
                 HttpStatus.PRECONDITION_REQUIRED,
                 "RBAC_MFA_REQUIRED",
                 "Yêu cầu xác thực lại trước khi đăng xuất tất cả phiên."
+        );
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_VERIFICATION_INVALID",
+                "Token xác thực không hợp lệ hoặc đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(VerificationAlreadyCompleteException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationAlreadyComplete(VerificationAlreadyCompleteException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_VERIFICATION_ALREADY_COMPLETE",
+                "Thông tin này đã được xác thực."
+        );
+    }
+
+    @ExceptionHandler(ResendLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleResendLimitExceeded(ResendLimitExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_RESEND_LIMIT_EXCEEDED",
+                "Đã vượt quá số lần gửi lại email xác thực cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidPhoneFormatException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPhoneFormat(InvalidPhoneFormatException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Số điện thoại không đúng định dạng."
+        );
+    }
+
+    @ExceptionHandler(OtpRateLimitedException.class)
+    public ResponseEntity<ApiErrorResponse> handleOtpRateLimited(OtpRateLimitedException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_OTP_RATE_LIMITED",
+                "Vui lòng thử lại sau."
+        );
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOtp(InvalidOtpException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_VERIFICATION_INVALID",
+                "Mã xác thực không hợp lệ hoặc đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(OtpAttemptsExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleOtpAttemptsExceeded(OtpAttemptsExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_OTP_ATTEMPTS_EXCEEDED",
+                "Bạn đã thử quá số lần cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordRecoveryInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordRecoveryInput(InvalidPasswordRecoveryInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetToken(InvalidPasswordResetTokenException ex) {
+
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_RESET_INVALID",
+                "Liên kết đặt lại mật khẩu không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordInput(InvalidPasswordInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Mật khẩu mới chưa đáp ứng yêu cầu."
         );
     }
 

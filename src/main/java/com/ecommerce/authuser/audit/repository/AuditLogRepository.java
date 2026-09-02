@@ -39,4 +39,10 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             @Param("before") Instant before,
             Pageable pageable
     );
+
+    long countByActorUserIdAndActionAndOccurredAtAfter(
+            UUID actorUserId,
+            String action,
+            Instant occurredAfter
+    );
 }

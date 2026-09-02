@@ -220,4 +220,56 @@ public class User {
 
         return user;
     }
+
+    public void verifyEmail(Instant now) {
+        Objects.requireNonNull(now);
+
+        if (emailVerifiedAt != null) {
+            throw new IllegalStateException(
+                    "Email is already verified"
+            );
+        }
+
+        emailVerifiedAt = now;
+    }
+
+    public void verifyPhone(
+            String phone,
+            String phoneNormalized,
+            Instant now
+    ) {
+        Objects.requireNonNull(phone);
+        Objects.requireNonNull(phoneNormalized);
+        Objects.requireNonNull(now);
+
+        if (phoneVerifiedAt != null
+                && Objects.equals(this.phoneNormalized, phoneNormalized)
+        ) {
+            throw new IllegalStateException(
+                    "Phone is already verified"
+            );
+        }
+
+        this.phone = phone;
+        this.phoneNormalized = phoneNormalized;
+        this.phoneVerifiedAt = now;
+    }
+
+    public void changePassword(
+            String newPasswordHash,
+            Instant now
+    ) {
+        Objects.requireNonNull(newPasswordHash);
+
+        Objects.requireNonNull(now);
+
+        if (newPasswordHash.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Password hash must not be blank"
+            );
+        }
+
+        this.passwordHash = newPasswordHash;
+        this.passwordChangedAt = now;
+    }
 }
