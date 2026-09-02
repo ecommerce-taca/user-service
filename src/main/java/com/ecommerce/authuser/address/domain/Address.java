@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -94,6 +95,27 @@ public class Address {
         address.defaultAddress = defaultAddress;
 
         return address;
+    }
+
+    public void updateDetails(
+            String recipient,
+            String phone,
+            String line1,
+            String line2,
+            String ward,
+            String district,
+            String province,
+            String postalCode
+    ) {
+
+        this.recipient = Objects.requireNonNull(recipient);
+        this.phone = Objects.requireNonNull(phone);
+        this.line1 = Objects.requireNonNull(line1);
+        this.line2 = line2;
+        this.ward = Objects.requireNonNull(ward);
+        this.district = Objects.requireNonNull(district);
+        this.province = Objects.requireNonNull(province);
+        this.postalCode = postalCode;
     }
 
     @PrePersist
