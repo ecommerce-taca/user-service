@@ -28,4 +28,10 @@ public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
             UUID userId,
             String roleKey
     );
+
+    boolean existsByUser_IdAndRole_RoleKeyAndShop_IdAndRevokedAtIsNull(
+            UUID userId,
+            String roleKey,
+            UUID shopId
+    );
 }

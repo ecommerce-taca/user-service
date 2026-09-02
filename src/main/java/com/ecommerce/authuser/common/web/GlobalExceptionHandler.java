@@ -437,6 +437,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ShopNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopNotFound(
+            ShopNotFoundException ex
+    ) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "SHOP_NOT_FOUND",
+                "Không tìm thấy gian hàng."
+        );
+    }
+
+    @ExceptionHandler(SellerPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerPermissionDenied(
+            SellerPermissionDeniedException ex
+    ) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
