@@ -272,4 +272,49 @@ public class User {
         this.passwordHash = newPasswordHash;
         this.passwordChangedAt = now;
     }
+
+    public void updateProfile(
+            String fullName,
+            boolean updatePhone,
+            String phone,
+            String phoneNormalized,
+            boolean updateDateOfBirth,
+            LocalDate dateOfBirth
+    ) {
+        Objects.requireNonNull(fullName);
+
+        if (fullName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Full name must not be blank"
+            );
+        }
+
+        if (updatePhone) {
+            boolean phoneNullMismatch =
+                    (phone == null) != (phoneNormalized == null);
+
+            if (phoneNullMismatch) {
+                throw new IllegalArgumentException(
+                        "Phone and normalized phone must be both null or both non-null"
+                );
+            }
+        }
+
+        this.fullName = fullName;
+
+        if (updatePhone
+                && !Objects.equals(
+                this.phoneNormalized,
+                phoneNormalized
+        )) {
+
+            this.phone = phone;
+            this.phoneNormalized = phoneNormalized;
+            this.phoneVerifiedAt = null;
+        }
+
+        if (updateDateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+        }
+    }
 }
