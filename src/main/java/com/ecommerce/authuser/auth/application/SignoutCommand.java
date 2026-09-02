@@ -7,6 +7,7 @@ public record SignoutCommand(
         UUID sessionId,
         String refreshToken,
         boolean allSessions,
+        String stepUpToken,
         String clientIp
 ) {
 }

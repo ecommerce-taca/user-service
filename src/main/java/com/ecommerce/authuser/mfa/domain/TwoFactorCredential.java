@@ -50,6 +50,9 @@ public class TwoFactorCredential {
     @Column(name = "key_version", nullable = false, length = 32)
     private String keyVersion;
 
+    @Column(name = "last_totp_step")
+    private Long lastTotpStep;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 16)
     private TwoFactorStatus status;
@@ -148,14 +151,16 @@ public class TwoFactorCredential {
         this.status = TwoFactorStatus.ENROLLING;
         this.enabledAt = null;
         this.disabledAt = null;
+        this.lastTotpStep = null;
     }
 
     public void enable(Instant now) {
         Objects.requireNonNull(now);
 
-        if (status != TwoFactorStatus.ENROLLING) {
+        if (status != TwoFactorStatus.ENROLLING
+                && status != TwoFactorStatus.RESET_REQUIRED) {
             throw new IllegalStateException(
-                    "Only ENROLLING credential can be enabled"
+                    "Only ENROLLING or RESET_REQUIRED credential can be enabled"
             );
         }
 
@@ -186,5 +191,67 @@ public class TwoFactorCredential {
         }
 
         status = TwoFactorStatus.RESET_REQUIRED;
+    }
+
+    public byte[] getSecretCiphertextCopy() {
+        return Arrays.copyOf(
+                secretCiphertext,
+                secretCiphertext.length
+        );
+    }
+
+    public boolean hasUsedTotpStep(long step) {
+        if (step < 0) {
+            throw new IllegalArgumentException(
+                    "TOTP step must not be negative"
+            );
+        }
+
+        return lastTotpStep != null && step <= lastTotpStep;
+    }
+
+    public void recordTotpStepUsed(long step) {
+        if (step < 0) {
+            throw new IllegalArgumentException(
+                    "TOTP step must not be negative"
+            );
+        }
+
+        if (lastTotpStep != null && step <= lastTotpStep) {
+
+            throw new IllegalStateException(
+                    "TOTP step has already been used"
+            );
+        }
+
+        lastTotpStep = step;
+    }
+
+    public void beginResetEnrollment(
+            byte[] newSecretCiphertext,
+            String newKeyVersion
+    ) {
+
+        if (status != TwoFactorStatus.RESET_REQUIRED) {
+            throw new IllegalStateException(
+                    "Only RESET_REQUIRED credential can begin reset enrollment"
+            );
+        }
+
+        validateSecret(newSecretCiphertext, newKeyVersion);
+
+        this.secretCiphertext = Arrays.copyOf(
+                newSecretCiphertext,
+                newSecretCiphertext.length
+        );
+
+        this.keyVersion = newKeyVersion;
+
+        this.status = TwoFactorStatus.RESET_REQUIRED;
+
+        this.enabledAt = null;
+        this.disabledAt = null;
+
+        this.lastTotpStep = null;
     }
 }

@@ -1,12 +1,18 @@
 package com.ecommerce.authuser.auth.web;
 
 import com.ecommerce.authuser.auth.application.*;
+import com.ecommerce.authuser.auth.application.mfa.*;
 import com.ecommerce.authuser.auth.application.password.*;
+import com.ecommerce.authuser.auth.exception.mfa.InvalidMfaVerifyRequestException;
+import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredException;
+import com.ecommerce.authuser.auth.web.mfa.*;
 import com.ecommerce.authuser.auth.web.password.PasswordForgotRequest;
 import com.ecommerce.authuser.auth.web.password.PasswordForgotResponse;
 import com.ecommerce.authuser.auth.web.password.PasswordResetRequest;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.mfa.domain.MfaMethod;
+import com.ecommerce.authuser.mfa.domain.MfaPurpose;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -45,6 +51,14 @@ public class AuthController {
     private final PasswordForgotService passwordForgotService;
 
     private final PasswordResetService passwordResetService;
+
+    private final MfaSetupService mfaSetupService;
+
+    private final MfaEnrollVerifyService mfaEnrollVerifyService;
+
+    private final MfaLoginVerifyService mfaLoginVerifyService;
+
+    private final MfaStepUpVerifyService mfaStepUpVerifyService;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
@@ -181,6 +195,7 @@ public class AuthController {
     public ResponseEntity<Void> signout(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody(required = false) SignoutRequest request,
+            @RequestHeader(name = "X-MFA-Step-Up", required = false)String stepUpToken,
             HttpServletRequest httpRequest
     ) {
 
@@ -201,6 +216,7 @@ public class AuthController {
                         sessionId,
                         refreshToken,
                         allSessions,
+                        stepUpToken,
                         httpRequest.getRemoteAddr()
                 )
         );
@@ -380,5 +396,210 @@ public class AuthController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @PostMapping("/2fa/setup")
+    public ResponseEntity<MfaSetupResponse> setupMfa(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        MfaSetupResult result = mfaSetupService.setup(new MfaSetupCommand(userId));
+
+        MfaSetupResponse response =
+                new MfaSetupResponse(
+                        new MfaSetupResponse.Data(
+                                result.setupId(),
+                                result.issuer(),
+                                result.account(),
+                                result.otpauthUri(),
+                                result.expiresAt()
+                        ),
+
+                        new MfaSetupResponse.Meta(
+                                resolveRequestId(
+                                        requestId
+                                )
+                        )
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header("Cache-Control", "no-store")
+                .header("Pragma", "no-cache")
+                .body(response);
+    }
+
+    @PostMapping("/2fa/verify")
+    public ResponseEntity<?> verifyMfa(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody MfaVerifyRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+        String resolvedRequestId = resolveRequestId(requestId);
+
+        if (request.purpose() == MfaPurpose.ENROLL) {
+            return verifyMfaEnrollment(
+                    jwt,
+                    request,
+                    resolvedRequestId
+            );
+        }
+
+        if (request.purpose() == MfaPurpose.LOGIN) {
+            return verifyMfaLogin(
+                    request,
+                    resolvedRequestId
+            );
+        }
+
+        if (request.purpose() == MfaPurpose.STEP_UP) {
+            return verifyMfaStepUp(
+                    jwt,
+                    request,
+                    resolvedRequestId
+            );
+        }
+
+        throw new InvalidMfaVerifyRequestException();
+    }
+
+    private ResponseEntity<MfaEnrollVerifyResponse> verifyMfaEnrollment(
+            Jwt jwt,
+            MfaVerifyRequest request,
+            String requestId
+    ) {
+        if (jwt == null) {
+            throw new MfaAuthenticationRequiredException();
+        }
+
+        if (request.method() != MfaMethod.TOTP
+                || request.setupId() == null
+                || request.challengeId() != null) {
+            throw new InvalidMfaVerifyRequestException();
+        }
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        MfaEnrollVerifyResult result = mfaEnrollVerifyService.verify(
+                new MfaEnrollVerifyCommand(
+                        userId,
+                        request.setupId(),
+                        request.code()
+                )
+        );
+
+        MfaEnrollVerifyResponse response = new MfaEnrollVerifyResponse(
+                new MfaEnrollVerifyResponse.Data(
+                        result.status(),
+                        result.enabledAt(),
+                        result.recoveryCodes()
+                ),
+
+                new MfaEnrollVerifyResponse.Meta(requestId)
+        );
+
+        return ResponseEntity
+                .ok()
+                .header("Cache-Control", "no-store")
+                .header("Pragma", "no-cache")
+                .body(response);
+    }
+
+    private ResponseEntity<MfaLoginVerifyResponse> verifyMfaLogin(
+            MfaVerifyRequest request,
+            String requestId
+    ) {
+
+        if (request.challengeId() == null || request.setupId() != null) {
+            throw new InvalidMfaVerifyRequestException();
+        }
+
+        MfaLoginVerifyResult result = mfaLoginVerifyService.verify(
+                new MfaLoginVerifyCommand(
+                        request.challengeId(),
+                        request.method(),
+                        request.code()
+                )
+        );
+
+        MfaLoginVerifyResponse response = new MfaLoginVerifyResponse(
+                new MfaLoginVerifyResponse.Data(
+                        new MfaLoginVerifyResponse.TokenData(
+                                "Bearer",
+                                result.accessToken(),
+                                result.accessExpiresIn(),
+                                result.refreshToken(),
+                                result.refreshExpiresIn()
+                        )
+                ),
+                new MfaLoginVerifyResponse.Meta(requestId)
+        );
+
+        return ResponseEntity
+                .ok()
+                .header("Cache-Control", "no-store")
+                .header("Pragma", "no-cache")
+                .body(response);
+    }
+
+    private ResponseEntity<MfaStepUpVerifyResponse> verifyMfaStepUp(
+            Jwt jwt,
+            MfaVerifyRequest request,
+            String requestId
+    ) {
+        if (jwt == null) {
+            throw new MfaAuthenticationRequiredException();
+        }
+
+        if (request.challengeId() == null
+                || request.setupId() != null) {
+            throw new InvalidMfaVerifyRequestException();
+        }
+
+        UUID userId;
+
+        UUID sessionId;
+
+        try {
+
+            userId = UUID.fromString(jwt.getSubject());
+
+            sessionId = UUID.fromString(
+                    jwt.getClaimAsString("session_id")
+            );
+
+        } catch (RuntimeException ex) {
+
+            throw new MfaAuthenticationRequiredException();
+        }
+
+        MfaStepUpVerifyResult result =
+                mfaStepUpVerifyService.verify(
+
+                        new MfaStepUpVerifyCommand(
+                                userId,
+                                sessionId,
+                                request.challengeId(),
+                                request.method(),
+                                request.code()
+                        )
+                );
+
+        MfaStepUpVerifyResponse response = new MfaStepUpVerifyResponse(
+                new MfaStepUpVerifyResponse.Data(
+                        result.stepUpToken(),
+                        result.expiresAt()
+                ),
+
+                new MfaStepUpVerifyResponse.Meta(requestId)
+                );
+
+        return ResponseEntity
+                .ok()
+                .header("Cache-Control", "no-store")
+                .header("Pragma", "no-cache")
+                .body(response);
     }
 }
