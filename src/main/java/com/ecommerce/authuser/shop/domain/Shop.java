@@ -130,6 +130,31 @@ public class Shop {
         return shop;
     }
 
+    public boolean canEditOnboarding() {
+        return status == ShopStatus.DRAFT;
+    }
+
+    public void updateOnboardingProfile(
+            String name,
+            String businessName,
+            String taxCode,
+            String description,
+            String logoObjectKey
+    ) {
+
+        if (!canEditOnboarding()) {
+            throw new IllegalStateException(
+                    "Shop is not editable during onboarding"
+            );
+        }
+
+        this.name = name;
+        this.businessName = businessName;
+        this.taxCode = taxCode;
+        this.description = description;
+        this.logoObjectKey = logoObjectKey;
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

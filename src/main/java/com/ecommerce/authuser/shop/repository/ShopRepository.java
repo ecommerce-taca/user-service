@@ -34,4 +34,20 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
     Optional<Shop> findFirstByOwner_IdAndDeletedAtIsNullOrderByCreatedAtDesc(
             UUID ownerUserId
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select shop
+        from Shop shop
+        where shop.owner.id = :ownerUserId
+             and shop.deletedAt is null
+        """)
+    Optional<Shop> findByOwnerIdForUpdate(
+            @Param("ownerUserId") UUID ownerUserId
+    );
+
+    boolean existsByTaxCodeAndIdNot(
+            String taxCode,
+            UUID shopId
+    );
 }

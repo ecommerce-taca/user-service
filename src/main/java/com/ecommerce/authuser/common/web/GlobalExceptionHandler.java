@@ -459,6 +459,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidSellerProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerProfile(InvalidSellerProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ShopInvalidStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopInvalidState(ShopInvalidStateException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_INVALID_STATE",
+                "Trạng thái gian hàng không cho phép thao tác."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
