@@ -30,4 +30,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID> {
         and shop.deletedAt is null
         """)
     Optional<Shop> findByIdForUpdate(@Param("shopId") UUID shopId);
+
+    Optional<Shop> findFirstByOwner_IdAndDeletedAtIsNullOrderByCreatedAtDesc(
+            UUID ownerUserId
+    );
 }
