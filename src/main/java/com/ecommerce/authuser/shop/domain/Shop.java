@@ -54,7 +54,7 @@ public class Shop {
     @Column(name = "tax_code", length = 20)
     private String taxCode;
 
-    @Column(name = "description", length = 200)
+    @Column(name = "description", length = 2000)
     private String description;
 
     @Column(name = "logo_object_key", length = 512)

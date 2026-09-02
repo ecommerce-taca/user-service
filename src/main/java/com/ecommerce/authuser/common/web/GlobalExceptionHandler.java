@@ -8,6 +8,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
@@ -388,6 +389,51 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "ADDRESS_DEFAULT_REQUIRED",
                 "Cần có một địa chỉ mặc định."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerRegistrationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerRegistration(InvalidSellerRegistrationException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(SellerEmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerEmailNotVerified(SellerEmailNotVerifiedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "AUTH_EMAIL_NOT_VERIFIED",
+                "Vui lòng xác thực email trước."
+        );
+    }
+
+    @ExceptionHandler(ShopAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopAlreadyExists(ShopAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_ALREADY_EXISTS",
+                "Tài khoản đã có hồ sơ người bán."
+        );
+    }
+
+    @ExceptionHandler(TaxCodeAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTaxCodeAlreadyExists(TaxCodeAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_TAX_CODE_EXISTS",
+                "Mã số thuế đã được sử dụng."
+        );
+    }
+
+    @ExceptionHandler(ShopSlugAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopSlugAlreadyExists(ShopSlugAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_SLUG_EXISTS",
+                "Đường dẫn gian hàng đã tồn tại."
         );
     }
 
