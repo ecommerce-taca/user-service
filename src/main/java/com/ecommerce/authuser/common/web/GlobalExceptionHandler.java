@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.common.web;
 
+import com.ecommerce.authuser.address.exception.InvalidAddressQueryException;
 import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
@@ -342,6 +343,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "AUTH_PHONE_EXISTS",
                 "Số điện thoại đã được sử dụng."
+        );
+    }
+
+    @ExceptionHandler(InvalidAddressQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAddressQuery(InvalidAddressQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
         );
     }
 
