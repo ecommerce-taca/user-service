@@ -36,3 +36,10 @@ auth:
 
   otp:
     hash-key-base64: ${AUTH_OTP_HASH_KEY_BASE64}
+
+  mfa:
+    encryption-key-base64: ${AUTH_MFA_ENCRYPTION_KEY_BASE64}
+
+  jwt:
+    private-key-base64: ${AUTH_JWT_PRIVATE_KEY_BASE64}
+    public-key-base64: ${AUTH_JWT_PUBLIC_KEY_BASE64}

@@ -1,6 +1,7 @@
 package com.ecommerce.authuser.common.web;
 
 import com.ecommerce.authuser.auth.exception.*;
+import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
@@ -9,6 +10,7 @@ import com.ecommerce.authuser.common.id.UuidV7Generator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -89,7 +91,15 @@ public class GlobalExceptionHandler {
         return buildError(
                 HttpStatus.UNAUTHORIZED,
                 "AUTH_MFA_REQUIRED",
-                "Vui lòng xác thực 2FA."
+                "Vui lòng xác thực 2FA.",
+                java.util.Map.of(
+                        "challenge_id",
+                        ex.getChallengeId(),
+                        "expires_at",
+                        ex.getExpiresAt(),
+                        "methods",
+                        ex.getMethods()
+                )
         );
     }
 
@@ -122,10 +132,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MfaStepUpRequiredException.class)
     public ResponseEntity<ApiErrorResponse> handleMfaStepUpRequired(MfaStepUpRequiredException ex) {
+        Object details =
+                ex.getChallengeId() == null
+                        ? null
+                        : java.util.Map.of(
+                        "challenge_id",
+                        ex.getChallengeId(),
+                        "expires_at",
+                        ex.getExpiresAt(),
+                        "methods",
+                        ex.getMethods()
+                );
+
         return buildError(
                 HttpStatus.PRECONDITION_REQUIRED,
                 "RBAC_MFA_REQUIRED",
-                "Yêu cầu xác thực lại trước khi đăng xuất tất cả phiên."
+                "Vui lòng xác thực lại trước khi tiếp tục.",
+                details
         );
     }
 
@@ -217,6 +240,78 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "AUTH_INVALID_INPUT",
                 "Mật khẩu mới chưa đáp ứng yêu cầu."
+        );
+    }
+
+    @ExceptionHandler(MfaAlreadyEnabledException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAlreadyEnabled(MfaAlreadyEnabledException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_MFA_ALREADY_ENABLED",
+                "2FA đã được bật."
+        );
+    }
+
+    @ExceptionHandler(MfaSetupForbiddenException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaSetupForbidden(MfaSetupForbiddenException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidMfaCodeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidMfaCode(InvalidMfaCodeException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_MFA_INVALID",
+                "Mã 2FA không đúng."
+        );
+    }
+
+    @ExceptionHandler(MfaChallengeExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaChallengeExpired(MfaChallengeExpiredException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_MFA_CHALLENGE_EXPIRED",
+                "Phiên xác thực 2FA đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(MfaAttemptsExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAttemptsExceeded(MfaAttemptsExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_MFA_ATTEMPTS_EXCEEDED",
+                "Bạn đã thử quá số lần cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidMfaVerifyRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidMfaVerifyRequest(InvalidMfaVerifyRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(MfaAuthenticationRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAuthenticationRequired(MfaAuthenticationRequiredException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_TOKEN_INVALID",
+                "Phiên đăng nhập không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnreadableRequest(HttpMessageNotReadableException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
         );
     }
 

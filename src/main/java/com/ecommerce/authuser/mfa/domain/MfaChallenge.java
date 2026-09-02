@@ -44,6 +44,18 @@ public class MfaChallenge {
     @Column(name = "attempt_count", nullable = false, columnDefinition = "TINYINT UNSIGNED")
     private byte attemptCount;
 
+    @Column(name = "session_id", columnDefinition = "BINARY(16)")
+    private UUID sessionId;
+
+    @Column(name = "login_identifier_hash", length = 64, columnDefinition = "CHAR(64)")
+    private String loginIdentifierHash;
+
+    @Column(name = "login_ip_hash", length = 64, columnDefinition = "CHAR(64)")
+    private String loginIpHash;
+
+    @Column(name = "login_user_agent_hash", length = 64, columnDefinition = "CHAR(64)")
+    private String loginUserAgentHash;
+
     @Column(name = "verified_at")
     private Instant verifiedAt;
 
@@ -94,6 +106,95 @@ public class MfaChallenge {
         challenge.attemptCount = 0;
 
         return challenge;
+    }
+
+    public static MfaChallenge createStepUp(
+            User user,
+            UUID sessionId,
+            Instant createdAt,
+            Instant expiresAt
+    ) {
+
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(sessionId);
+        Objects.requireNonNull(createdAt);
+        Objects.requireNonNull(expiresAt);
+
+        if (!expiresAt.isAfter(createdAt)) {
+            throw new IllegalArgumentException(
+                    "expiresAt must be after createdAt"
+            );
+        }
+
+        MfaChallenge challenge = new MfaChallenge();
+
+        challenge.id = UuidV7Generator.generate();
+        challenge.user = user;
+        challenge.sessionId = sessionId;
+        challenge.purpose = MfaPurpose.STEP_UP;
+        challenge.codeHash = null;
+        challenge.expiresAt = expiresAt;
+        challenge.attemptCount = 0;
+        challenge.createdAt = createdAt;
+
+        return challenge;
+    }
+
+    public void attachLoginAuditContext(
+            String identifierHash,
+            String ipHash,
+            String userAgentHash
+    ) {
+
+        if (purpose != MfaPurpose.LOGIN) {
+            throw new IllegalStateException(
+                    "Login audit context can only be attached to LOGIN challenge"
+            );
+        }
+
+        validateAuditHash(identifierHash, "identifierHash");
+
+        validateAuditHash(ipHash, "ipHash");
+
+        if (userAgentHash != null) {
+            validateAuditHash(userAgentHash, "userAgentHash");
+        }
+
+        if (loginIdentifierHash != null
+                || loginIpHash != null
+                || loginUserAgentHash != null) {
+
+            throw new IllegalStateException(
+                    "Login audit context is already attached"
+            );
+        }
+
+        loginIdentifierHash = identifierHash.toLowerCase();
+
+        loginIpHash = ipHash.toLowerCase();
+
+        loginUserAgentHash = userAgentHash == null
+                        ? null
+                        : userAgentHash.toLowerCase();
+    }
+
+    private static void validateAuditHash(
+            String value,
+            String fieldName
+    ) {
+
+        if (value == null || !value.matches("^[0-9a-fA-F]{64}$")) {
+            throw new IllegalArgumentException(
+                    fieldName + " must be a 64-character hex digest"
+            );
+        }
+    }
+
+    public boolean belongsToSession(UUID expectedSessionId) {
+        return sessionId != null
+                && sessionId.equals(
+                expectedSessionId
+        );
     }
 
     public boolean isExpired(Instant now) {
@@ -157,5 +258,11 @@ public class MfaChallenge {
         if (revokedAt == null) {
             revokedAt = now;
         }
+    }
+
+    public boolean hasLoginAuditContext() {
+        return purpose == MfaPurpose.LOGIN
+                && loginIdentifierHash != null
+                && loginIpHash != null;
     }
 }
