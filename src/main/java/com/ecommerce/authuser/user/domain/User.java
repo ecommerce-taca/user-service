@@ -254,4 +254,22 @@ public class User {
         this.phoneNormalized = phoneNormalized;
         this.phoneVerifiedAt = now;
     }
+
+    public void changePassword(
+            String newPasswordHash,
+            Instant now
+    ) {
+        Objects.requireNonNull(newPasswordHash);
+
+        Objects.requireNonNull(now);
+
+        if (newPasswordHash.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Password hash must not be blank"
+            );
+        }
+
+        this.passwordHash = newPasswordHash;
+        this.passwordChangedAt = now;
+    }
 }

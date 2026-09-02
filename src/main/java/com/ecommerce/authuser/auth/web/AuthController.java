@@ -1,6 +1,10 @@
 package com.ecommerce.authuser.auth.web;
 
 import com.ecommerce.authuser.auth.application.*;
+import com.ecommerce.authuser.auth.application.password.*;
+import com.ecommerce.authuser.auth.web.password.PasswordForgotRequest;
+import com.ecommerce.authuser.auth.web.password.PasswordForgotResponse;
+import com.ecommerce.authuser.auth.web.password.PasswordResetRequest;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +41,10 @@ public class AuthController {
     private final PhoneOtpRequestService phoneOtpRequestService;
 
     private final PhoneOtpVerifyService phoneOtpVerifyService;
+
+    private final PasswordForgotService passwordForgotService;
+
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
@@ -331,5 +339,46 @@ public class AuthController {
         return ResponseEntity.ok(
                 response
         );
+    }
+
+    @PostMapping("/password/forgot")
+    public ResponseEntity<PasswordForgotResponse> forgotPassword(
+            @Valid @RequestBody PasswordForgotRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+        PasswordForgotResult result =
+                passwordForgotService.forgot(
+                        new PasswordForgotCommand(request.identifier())
+                );
+
+        PasswordForgotResponse response = new PasswordForgotResponse(
+                new PasswordForgotResponse.Data(
+                        result.accepted(),
+                        "Nếu tài khoản tồn tại, hướng dẫn đặt lại mật khẩu sẽ được gửi."
+                ),
+
+                new PasswordForgotResponse.Meta(
+                        resolveRequestId(requestId))
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
+    }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<Void> resetPassword(
+            @Valid @RequestBody PasswordResetRequest request
+    ) {
+        passwordResetService.reset(
+                new PasswordResetCommand(
+                        request.token(),
+                        request.newPassword()
+                )
+        );
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

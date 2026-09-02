@@ -1,6 +1,9 @@
 package com.ecommerce.authuser.common.web;
 
 import com.ecommerce.authuser.auth.exception.*;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
+import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import org.springframework.http.HttpStatus;
@@ -186,6 +189,34 @@ public class GlobalExceptionHandler {
                 HttpStatus.TOO_MANY_REQUESTS,
                 "AUTH_OTP_ATTEMPTS_EXCEEDED",
                 "Bạn đã thử quá số lần cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordRecoveryInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordRecoveryInput(InvalidPasswordRecoveryInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetToken(InvalidPasswordResetTokenException ex) {
+
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_RESET_INVALID",
+                "Liên kết đặt lại mật khẩu không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidPasswordInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordInput(InvalidPasswordInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Mật khẩu mới chưa đáp ứng yêu cầu."
         );
     }
 
