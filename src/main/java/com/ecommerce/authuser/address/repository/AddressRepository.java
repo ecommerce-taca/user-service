@@ -21,9 +21,13 @@ public interface AddressRepository extends JpaRepository<Address, UUID> {
             UUID userId
     );
 
-    Optional<Address> findByUser_IdAndDefaultAddressTrueAndDeletedAtIsNull(UUID userId);
+    Optional<Address> findByUser_IdAndDefaultAddressTrueAndDeletedAtIsNull(
+            UUID userId
+    );
 
-    Optional<Address> findFirstByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDesc(UUID userId);
+    Optional<Address> findFirstByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDescIdDesc(
+            UUID userId
+    );
 
     long countByUser_IdAndDeletedAtIsNull(UUID userId);
 
