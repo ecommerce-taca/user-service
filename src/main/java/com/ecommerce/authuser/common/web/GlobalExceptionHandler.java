@@ -1,8 +1,6 @@
 package com.ecommerce.authuser.common.web;
 
-import com.ecommerce.authuser.address.exception.AddressLimitReachedException;
-import com.ecommerce.authuser.address.exception.InvalidAddressInputException;
-import com.ecommerce.authuser.address.exception.InvalidAddressQueryException;
+import com.ecommerce.authuser.address.exception.*;
 import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
@@ -372,6 +370,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "ADDRESS_LIMIT_REACHED",
                 "Bạn đã đạt giới hạn số địa chỉ."
+        );
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressNotFound(AddressNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "ADDRESS_NOT_FOUND",
+                "Không tìm thấy địa chỉ."
+        );
+    }
+
+    @ExceptionHandler(AddressDefaultRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressDefaultRequired(AddressDefaultRequiredException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "ADDRESS_DEFAULT_REQUIRED",
+                "Cần có một địa chỉ mặc định."
         );
     }
 
