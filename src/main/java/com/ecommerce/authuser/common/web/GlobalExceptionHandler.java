@@ -7,6 +7,8 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
+import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -322,6 +324,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND,
                 "AUTH_USER_NOT_FOUND",
                 "Không tìm thấy tài khoản."
+        );
+    }
+
+    @ExceptionHandler(ProfileInvalidException.class)
+    public ResponseEntity<ApiErrorResponse> handleProfileInvalid(ProfileInvalidException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ProfilePhoneAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleProfilePhoneExists(ProfilePhoneAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_PHONE_EXISTS",
+                "Số điện thoại đã được sử dụng."
         );
     }
 
