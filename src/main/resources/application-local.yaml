@@ -33,3 +33,6 @@ auth:
 
   audit:
     hash-key-base64: ${AUTH_AUDIT_HASH_KEY_BASE64}
+
+  otp:
+    hash-key-base64: ${AUTH_OTP_HASH_KEY_BASE64}

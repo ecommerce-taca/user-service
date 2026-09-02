@@ -86,4 +86,20 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
             @Param("purpose") VerificationPurpose purpose,
             @Param("channel") VerificationChannel channel
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select token
+        from VerificationToken token
+        where token.id = :tokenId
+            and token.user.id = :userId
+            and token.channel = :channel
+            and token.purpose = :purpose
+        """)
+    Optional<VerificationToken> findChallengeForUpdate(
+            @Param("tokenId") UUID tokenId,
+            @Param("userId") UUID userId,
+            @Param("channel") VerificationChannel channel,
+            @Param("purpose") VerificationPurpose purpose
+    );
 }

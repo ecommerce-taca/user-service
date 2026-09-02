@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
         return buildError(
                 HttpStatus.CONFLICT,
                 "AUTH_VERIFICATION_ALREADY_COMPLETE",
-                "Email đã được xác thực."
+                "Thông tin này đã được xác thực."
         );
     }
 
@@ -150,6 +150,42 @@ public class GlobalExceptionHandler {
                 HttpStatus.TOO_MANY_REQUESTS,
                 "AUTH_RESEND_LIMIT_EXCEEDED",
                 "Đã vượt quá số lần gửi lại email xác thực cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidPhoneFormatException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPhoneFormat(InvalidPhoneFormatException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Số điện thoại không đúng định dạng."
+        );
+    }
+
+    @ExceptionHandler(OtpRateLimitedException.class)
+    public ResponseEntity<ApiErrorResponse> handleOtpRateLimited(OtpRateLimitedException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_OTP_RATE_LIMITED",
+                "Vui lòng thử lại sau."
+        );
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOtp(InvalidOtpException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_VERIFICATION_INVALID",
+                "Mã xác thực không hợp lệ hoặc đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(OtpAttemptsExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleOtpAttemptsExceeded(OtpAttemptsExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_OTP_ATTEMPTS_EXCEEDED",
+                "Bạn đã thử quá số lần cho phép."
         );
     }
 

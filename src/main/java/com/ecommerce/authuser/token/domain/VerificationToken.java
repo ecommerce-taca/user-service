@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -189,5 +191,18 @@ public class VerificationToken {
         token.attemptCount = 0;
 
         return token;
+    }
+
+    public boolean matchesTokenHash(String candidateHash) {
+        Objects.requireNonNull(candidateHash);
+
+        byte[] expected = tokenHash.getBytes(StandardCharsets.US_ASCII);
+
+        byte[] actual = candidateHash.getBytes(StandardCharsets.US_ASCII);
+
+        return MessageDigest.isEqual(
+                expected,
+                actual
+        );
     }
 }
