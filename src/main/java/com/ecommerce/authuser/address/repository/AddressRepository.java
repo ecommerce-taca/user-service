@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface AddressRepository extends JpaRepository<Address, UUID> {
 
-    Page<Address> findAllByUser_IdAndDeletedAtIsNullOrderByUpdatedAtDesc(
+    Page<Address> findAllByUser_IdAndDeletedAtIsNull(
             UUID userId,
             Pageable pageable
     );
