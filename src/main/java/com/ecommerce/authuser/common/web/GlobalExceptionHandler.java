@@ -1,5 +1,7 @@
 package com.ecommerce.authuser.common.web;
 
+import com.ecommerce.authuser.address.exception.AddressLimitReachedException;
+import com.ecommerce.authuser.address.exception.InvalidAddressInputException;
 import com.ecommerce.authuser.address.exception.InvalidAddressQueryException;
 import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.auth.exception.mfa.*;
@@ -352,6 +354,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "AUTH_INVALID_INPUT",
                 "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidAddressInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAddressInput(InvalidAddressInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(AddressLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressLimitReached(AddressLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "ADDRESS_LIMIT_REACHED",
+                "Bạn đã đạt giới hạn số địa chỉ."
         );
     }
 
