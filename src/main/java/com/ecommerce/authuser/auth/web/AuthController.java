@@ -34,6 +34,10 @@ public class AuthController {
 
     private final EmailVerificationResendService emailVerificationResendService;
 
+    private final PhoneOtpRequestService phoneOtpRequestService;
+
+    private final PhoneOtpVerifyService phoneOtpVerifyService;
+
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(
             @Valid @RequestBody SignupRequest request,
@@ -262,5 +266,70 @@ public class AuthController {
         return UuidV7Generator
                 .generate()
                 .toString();
+    }
+
+    @PostMapping("/phone/request-otp")
+    public ResponseEntity<PhoneOtpRequestResponse> requestPhoneOtp(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody PhoneOtpRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        PhoneOtpRequestResult result = phoneOtpRequestService.request(
+                new PhoneOtpRequestCommand(
+                        userId,
+                        request.phone()
+                )
+        );
+
+        PhoneOtpRequestResponse response = new PhoneOtpRequestResponse(
+                new PhoneOtpRequestResponse.Data(
+                        result.challengeId(),
+                        result.maskedPhone(),
+                        result.expiresAt(),
+                        result.maxAttempts()
+                ),
+                new PhoneOtpRequestResponse.Meta(
+                        resolveRequestId(requestId)
+                )
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
+    }
+
+    @PostMapping("/phone/verify-otp")
+    public ResponseEntity<PhoneOtpVerifyResponse> verifyPhoneOtp(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody PhoneOtpVerifyRequest request,
+            @RequestHeader(name = "X-Request-ID", required = false) String requestId
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        PhoneOtpVerifyResult result = phoneOtpVerifyService.verify(
+                new PhoneOtpVerifyCommand(
+                        userId,
+                        request.challengeId(),
+                        request.otp()
+                )
+        );
+
+        PhoneOtpVerifyResponse response = new PhoneOtpVerifyResponse(
+                new PhoneOtpVerifyResponse.Data(
+                        true,
+                        result.verifiedAt()
+                ),
+
+                new PhoneOtpVerifyResponse.Meta(
+                        resolveRequestId(requestId)
+                )
+        );
+
+        return ResponseEntity.ok(
+                response
+        );
     }
 }
