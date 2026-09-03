@@ -9,11 +9,14 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Profile("!prod")
-public class MockKycObjectStorageAdapter
-        implements KycObjectStoragePort {
+public class MockKycObjectStorageAdapter implements KycObjectStoragePort {
+
+    private final Map<String, ObjectMetadata> objects = new ConcurrentHashMap<>();
 
     @Override
     public PresignResult presignUpload(
@@ -28,8 +31,16 @@ public class MockKycObjectStorageAdapter
 
         String uploadUrl =
                 "https://storage.example/mock-upload/"
-                        + UuidV7Generator
-                        .generate();
+                        + UuidV7Generator.generate();
+
+        objects.put(
+                objectKey,
+                new ObjectMetadata(
+                        sizeBytes,
+                        contentType,
+                        sha256
+                )
+        );
 
         return new PresignResult(
                 uploadUrl,
@@ -40,6 +51,17 @@ public class MockKycObjectStorageAdapter
                         "x-content-sha256",
                         sha256
                 )
+        );
+    }
+
+    @Override
+    public Optional<ObjectMetadata> findObjectMetadata(String objectKey) {
+        if (objectKey == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(
+                objects.get(objectKey)
         );
     }
 }
