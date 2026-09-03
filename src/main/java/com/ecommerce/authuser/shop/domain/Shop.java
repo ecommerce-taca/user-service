@@ -155,6 +155,31 @@ public class Shop {
         this.logoObjectKey = logoObjectKey;
     }
 
+    public boolean canSubmitKyc() {
+        return status != ShopStatus.SUSPENDED
+                && status != ShopStatus.DELETED;
+    }
+
+    public void markKycPending() {
+        if (!canSubmitKyc()) {
+            throw new IllegalStateException(
+                    "Shop cannot submit KYC"
+            );
+        }
+
+        if (kycStatus != KycStatus.DRAFT
+                && kycStatus != KycStatus.NEEDS_INFO
+                && kycStatus != KycStatus.REJECTED
+                && kycStatus != KycStatus.EXPIRED) {
+
+            throw new IllegalStateException(
+                    "KYC cannot be submitted from status " + kycStatus
+            );
+        }
+
+        this.kycStatus = KycStatus.PENDING;
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

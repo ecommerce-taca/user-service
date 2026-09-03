@@ -8,6 +8,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.kyc.exception.*;
 import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
@@ -483,6 +484,60 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "PROFILE_INVALID",
                 "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidKycDocumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidKycDocument(InvalidKycDocumentException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "KYC_DOCUMENT_INVALID",
+                "Tài liệu không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentTooLargeException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentTooLarge(KycDocumentTooLargeException ex) {
+        return buildError(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "KYC_DOCUMENT_TOO_LARGE",
+                "Tài liệu vượt quá dung lượng cho phép."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentLimitReached(KycDocumentLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DOCUMENT_LIMIT_REACHED",
+                "Hồ sơ đã đạt giới hạn số tài liệu."
+        );
+    }
+
+    @ExceptionHandler(KycAlreadyPendingException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycAlreadyPending(KycAlreadyPendingException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_ALREADY_PENDING",
+                "Hồ sơ đang được xét duyệt."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentNotFound(KycDocumentNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "KYC_DOCUMENT_NOT_FOUND",
+                "Không tìm thấy tài liệu."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentAlreadyCompletedException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentAlreadyCompleted(KycDocumentAlreadyCompletedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DOCUMENT_ALREADY_COMPLETED",
+                "Tài liệu đã được hoàn tất."
         );
     }
 

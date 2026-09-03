@@ -115,6 +115,32 @@ public class SellerOnboarding {
         }
     }
 
+    public void completeKycSubmissionStep() {
+        kycCompleted = true;
+
+        replaceBlockers(List.of());
+
+        if (currentStep == OnboardingStep.KYC) {
+            currentStep = resolveNextStepAfterKyc();
+        }
+    }
+
+    private OnboardingStep resolveNextStepAfterKyc() {
+        if (!warehouseCompleted) {
+            return OnboardingStep.WAREHOUSE;
+        }
+
+        if (!bankCompleted) {
+            return OnboardingStep.BANK;
+        }
+
+        if (!firstProductCompleted) {
+            return OnboardingStep.FIRST_PRODUCT;
+        }
+
+        return OnboardingStep.COMPLETED;
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

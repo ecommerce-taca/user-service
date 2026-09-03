@@ -43,4 +43,9 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
         where k.id = :caseId
         """)
     Optional<KycCase> findByIdForUpdate(@Param("caseId") UUID caseId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<KycCase> findFirstByShop_IdOrderByCreatedAtDesc(
+            UUID shopId
+    );
 }
