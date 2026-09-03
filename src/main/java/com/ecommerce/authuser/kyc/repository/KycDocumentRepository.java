@@ -32,4 +32,10 @@ public interface KycDocumentRepository extends JpaRepository<KycDocument, UUID> 
             UUID kycCaseId,
             Collection<KycDocumentStatus> statuses
     );
+
+    boolean existsByKycCase_IdAndDocumentTypeAndSha256AndDeletedAtIsNull(
+            UUID kycCaseId,
+            String documentType,
+            String sha256
+    );
 }
