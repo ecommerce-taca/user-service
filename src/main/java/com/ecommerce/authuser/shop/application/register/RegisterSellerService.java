@@ -237,23 +237,14 @@ public class RegisterSellerService {
     }
 
     private String generateUniqueSlug(String name) {
-        String base = slugify(name);
-
-        if (base.length() > 160) {
-            base = base.substring(0, 160);
-        }
-
-        if (base.length() < 3) {
-            base = "shop";
-        }
+        String base = normalizeGeneratedSlugBase(slugify(name), 160);
 
         if (!shopRepository.existsBySlug(base)) {
             return base;
         }
 
         String suffix =
-                "-"
-                        + UuidV7Generator
+                "-" + UuidV7Generator
                         .generate()
                         .toString()
                         .replace("-", "")
@@ -262,14 +253,29 @@ public class RegisterSellerService {
         int maxBaseLength = 160 - suffix.length();
 
         String shortenedBase =
-                base.length() > maxBaseLength
-                        ? base.substring(
-                        0,
-                        maxBaseLength
-                )
-                        : base;
+                normalizeGeneratedSlugBase(base, maxBaseLength);
 
         return shortenedBase + suffix;
+    }
+
+    private String normalizeGeneratedSlugBase(
+            String value,
+            int maxLength
+    ) {
+
+        String normalized = value;
+
+        if (normalized.length() > maxLength) {
+            normalized = normalized.substring(0, maxLength);
+        }
+
+        normalized = normalized.replaceFirst("-+$", "");
+
+        if (normalized.length() < 3) {
+            return "shop";
+        }
+
+        return normalized;
     }
 
     private String slugify(String value) {
