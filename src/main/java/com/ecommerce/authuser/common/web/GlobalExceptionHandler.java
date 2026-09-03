@@ -8,6 +8,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
@@ -388,6 +389,100 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "ADDRESS_DEFAULT_REQUIRED",
                 "Cần có một địa chỉ mặc định."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerRegistrationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerRegistration(InvalidSellerRegistrationException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(SellerEmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerEmailNotVerified(SellerEmailNotVerifiedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "AUTH_EMAIL_NOT_VERIFIED",
+                "Vui lòng xác thực email trước."
+        );
+    }
+
+    @ExceptionHandler(ShopAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopAlreadyExists(ShopAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_ALREADY_EXISTS",
+                "Tài khoản đã có hồ sơ người bán."
+        );
+    }
+
+    @ExceptionHandler(TaxCodeAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTaxCodeAlreadyExists(TaxCodeAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_TAX_CODE_EXISTS",
+                "Mã số thuế đã được sử dụng."
+        );
+    }
+
+    @ExceptionHandler(ShopSlugAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopSlugAlreadyExists(ShopSlugAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_SLUG_EXISTS",
+                "Đường dẫn gian hàng đã tồn tại."
+        );
+    }
+
+    @ExceptionHandler(ShopNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopNotFound(
+            ShopNotFoundException ex
+    ) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "SHOP_NOT_FOUND",
+                "Không tìm thấy gian hàng."
+        );
+    }
+
+    @ExceptionHandler(SellerPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerPermissionDenied(
+            SellerPermissionDeniedException ex
+    ) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerProfile(InvalidSellerProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ShopInvalidStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopInvalidState(ShopInvalidStateException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_INVALID_STATE",
+                "Trạng thái gian hàng không cho phép thao tác."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerWarehouseException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerWarehouse(InvalidSellerWarehouseException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
         );
     }
 

@@ -54,7 +54,7 @@ public class Shop {
     @Column(name = "tax_code", length = 20)
     private String taxCode;
 
-    @Column(name = "description", length = 200)
+    @Column(name = "description", length = 2000)
     private String description;
 
     @Column(name = "logo_object_key", length = 512)
@@ -128,6 +128,31 @@ public class Shop {
         shop.kycStatus = KycStatus.DRAFT;
 
         return shop;
+    }
+
+    public boolean canEditOnboarding() {
+        return status == ShopStatus.DRAFT;
+    }
+
+    public void updateOnboardingProfile(
+            String name,
+            String businessName,
+            String taxCode,
+            String description,
+            String logoObjectKey
+    ) {
+
+        if (!canEditOnboarding()) {
+            throw new IllegalStateException(
+                    "Shop is not editable during onboarding"
+            );
+        }
+
+        this.name = name;
+        this.businessName = businessName;
+        this.taxCode = taxCode;
+        this.description = description;
+        this.logoObjectKey = logoObjectKey;
     }
 
     @PrePersist

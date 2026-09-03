@@ -96,6 +96,25 @@ public class SellerOnboarding {
         return onboarding;
     }
 
+    public void completeProfileStep() {
+        profileCompleted = true;
+
+        if (currentStep == OnboardingStep.PROFILE) {
+
+            currentStep = OnboardingStep.KYC;
+
+            replaceBlockers(List.of("KYC_DOCUMENT_REQUIRED"));
+        }
+    }
+
+    public void completeWarehouseStep() {
+        warehouseCompleted = true;
+
+        if (currentStep == OnboardingStep.WAREHOUSE) {
+            currentStep = OnboardingStep.BANK;
+        }
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();
