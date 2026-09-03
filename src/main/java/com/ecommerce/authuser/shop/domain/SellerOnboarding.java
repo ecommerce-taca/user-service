@@ -27,6 +27,8 @@ import java.util.UUID;
 @Getter
 public class SellerOnboarding {
 
+    private static final String KYC_DOCUMENT_REQUIRED = "KYC_DOCUMENT_REQUIRED";
+
     @Id
     @Column(
             name = "id",
@@ -103,7 +105,7 @@ public class SellerOnboarding {
 
             currentStep = OnboardingStep.KYC;
 
-            replaceBlockers(List.of("KYC_DOCUMENT_REQUIRED"));
+            replaceBlockers(List.of(KYC_DOCUMENT_REQUIRED));
         }
     }
 
@@ -143,11 +145,30 @@ public class SellerOnboarding {
     public void completeKycSubmissionStep() {
         kycCompleted = true;
 
-        replaceBlockers(List.of());
+        removeBlocker(KYC_DOCUMENT_REQUIRED);
 
         if (currentStep == OnboardingStep.KYC) {
             currentStep = resolveNextStepAfterKyc();
         }
+    }
+
+    public void reopenKycStep() {
+
+        kycCompleted = false;
+
+        currentStep = OnboardingStep.KYC;
+
+        addBlockerIfAbsent(KYC_DOCUMENT_REQUIRED);
+    }
+
+    private void addBlockerIfAbsent(String blocker) {
+        if (!blockers.contains(blocker)) {
+            blockers.add(blocker);
+        }
+    }
+
+    private void removeBlocker(String blocker) {
+        blockers.removeIf(blocker::equals);
     }
 
     private OnboardingStep resolveNextStepAfterKyc() {
