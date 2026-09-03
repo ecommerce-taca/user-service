@@ -83,7 +83,7 @@ public class PresignKycDocumentService {
             throw new SellerPermissionDeniedException();
         }
 
-        if (!shop.canEditOnboarding()) {
+        if (!shop.canManageKycDocuments()) {
             throw new ShopInvalidStateException();
         }
 
@@ -160,14 +160,12 @@ public class PresignKycDocumentService {
     }
 
     private KycCase resolveEditableCase(Shop shop) {
+
         List<KycCase> cases = kycCaseRepository
                 .findAllByShop_IdOrderByCreatedAtDesc(shop.getId());
 
         if (cases.isEmpty()) {
-            KycCase newCase =
-                    KycCase.createDraft(shop, 1);
-
-            return kycCaseRepository.saveAndFlush(newCase);
+            return createDraftCase(shop, 1);
         }
 
         KycCase latest = cases.getFirst();
@@ -180,10 +178,58 @@ public class PresignKycDocumentService {
 
         if (status == KycStatus.APPROVED
                 || status == KycStatus.SUSPENDED) {
+
             throw new ShopInvalidStateException();
         }
 
-        return latest;
+        if (status == KycStatus.DRAFT
+                || status == KycStatus.NEEDS_INFO) {
+
+            return latest;
+        }
+
+        if (status == KycStatus.REJECTED
+                || status == KycStatus.EXPIRED) {
+
+            int nextSourceVersion = nextSourceVersion(latest.getSourceVersion());
+
+            return createDraftCase(
+                    shop,
+                    nextSourceVersion
+            );
+        }
+
+        throw new ShopInvalidStateException();
+    }
+
+    private KycCase createDraftCase(
+            Shop shop,
+            int sourceVersion
+    ) {
+
+        KycCase newCase =
+                KycCase.createDraft(
+                        shop,
+                        sourceVersion
+                );
+
+        return kycCaseRepository
+                .saveAndFlush(
+                        newCase
+                );
+    }
+
+    private int nextSourceVersion(
+            int current
+    ) {
+
+        if (current < 1
+                || current == Integer.MAX_VALUE) {
+
+            throw new ShopInvalidStateException();
+        }
+
+        return current + 1;
     }
 
     private String normalizeDocumentType(String value) {
