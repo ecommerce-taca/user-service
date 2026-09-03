@@ -111,7 +111,32 @@ public class SellerOnboarding {
         warehouseCompleted = true;
 
         if (currentStep == OnboardingStep.WAREHOUSE) {
-            currentStep = OnboardingStep.BANK;
+            if (!bankCompleted) {
+                currentStep = OnboardingStep.BANK;
+                return;
+            }
+
+            if (!firstProductCompleted) {
+                currentStep = OnboardingStep.FIRST_PRODUCT;
+                return;
+            }
+
+            currentStep = OnboardingStep.COMPLETED;
+        }
+    }
+
+    public void completeBankStep() {
+
+        bankCompleted = true;
+
+        if (currentStep == OnboardingStep.BANK) {
+
+            if (!firstProductCompleted) {
+                currentStep = OnboardingStep.FIRST_PRODUCT;
+                return;
+            }
+
+            currentStep = OnboardingStep.COMPLETED;
         }
     }
 

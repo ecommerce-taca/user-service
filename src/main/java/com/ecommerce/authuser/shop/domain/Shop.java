@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -178,6 +179,77 @@ public class Shop {
         }
 
         this.kycStatus = KycStatus.PENDING;
+    }
+
+    public void updateBankAccount(
+            String bankCode,
+            String bankName,
+            String accountName,
+            String accountLast4,
+            byte[] accountCiphertext,
+            String keyVersion,
+            Instant verifiedAt
+    ) {
+
+        if (!canEditOnboarding()) {
+            throw new IllegalStateException(
+                    "Shop is not editable during onboarding"
+            );
+        }
+
+        if (bankCode == null
+                || bankCode.isBlank()
+                || bankCode.length() > 32) {
+            throw new IllegalArgumentException(
+                    "Invalid bank code"
+            );
+        }
+
+        if (bankName == null
+                || bankName.isBlank()
+                || bankName.length() > 120) {
+            throw new IllegalArgumentException(
+                    "Invalid bank name"
+            );
+        }
+
+        if (accountName == null
+                || accountName.isBlank()
+                || accountName.length() > 120) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account name"
+            );
+        }
+
+        if (accountLast4 == null || !accountLast4.matches("\\d{4}")) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account last4"
+            );
+        }
+
+        if (accountCiphertext == null
+                || accountCiphertext.length == 0
+                || accountCiphertext.length > 2048) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account ciphertext"
+            );
+        }
+
+        if (keyVersion == null
+                || keyVersion.isBlank()
+                || keyVersion.length() > 32) {
+            throw new IllegalArgumentException(
+                    "Invalid bank key version"
+            );
+        }
+
+        this.bankCode = bankCode;
+        this.bankName = bankName;
+        this.bankAccountName = accountName;
+        this.bankAccountLast4 = accountLast4;
+        this.bankAccountCiphertext = Arrays.copyOf(accountCiphertext, accountCiphertext.length);
+        this.bankKeyVersion = keyVersion;
+        this.bankVerifiedAt = verifiedAt;
     }
 
     @PrePersist
