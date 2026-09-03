@@ -107,6 +107,14 @@ public class SellerOnboarding {
         }
     }
 
+    public void completeWarehouseStep() {
+        warehouseCompleted = true;
+
+        if (currentStep == OnboardingStep.WAREHOUSE) {
+            currentStep = OnboardingStep.BANK;
+        }
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

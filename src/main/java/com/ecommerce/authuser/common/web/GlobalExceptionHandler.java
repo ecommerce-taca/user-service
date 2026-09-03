@@ -477,6 +477,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidSellerWarehouseException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerWarehouse(InvalidSellerWarehouseException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
