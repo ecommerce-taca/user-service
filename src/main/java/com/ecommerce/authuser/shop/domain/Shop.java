@@ -252,6 +252,60 @@ public class Shop {
         this.bankVerifiedAt = verifiedAt;
     }
 
+    public boolean canUpdateSellerProfile() {
+        return status == ShopStatus.DRAFT
+                || status == ShopStatus.ACTIVE;
+    }
+
+    public void updateSellerProfile(
+            boolean updateName,
+            String name,
+            boolean updateDescription,
+            String description,
+            boolean updateLogoObjectKey,
+            String logoObjectKey
+    ) {
+
+        if (!canUpdateSellerProfile()) {
+            throw new IllegalStateException(
+                    "Shop profile cannot be updated"
+            );
+        }
+
+        if (updateName) {
+
+            if (name == null
+                    || name.isBlank()
+                    || name.codePointCount(0, name.length()) > 120) {
+                throw new IllegalArgumentException(
+                        "Invalid shop name"
+                );
+            }
+
+            this.name = name;
+        }
+
+        if (updateDescription) {
+            if (description != null && description.codePointCount(0, description.length()) > 2000) {
+                throw new IllegalArgumentException(
+                        "Invalid shop description"
+                );
+            }
+
+            this.description = description;
+        }
+
+        if (updateLogoObjectKey) {
+            if (logoObjectKey != null && logoObjectKey.length() > 512) {
+                throw new IllegalArgumentException(
+                        "Invalid logo object key"
+                );
+            }
+
+            this.logoObjectKey = logoObjectKey;
+        }
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

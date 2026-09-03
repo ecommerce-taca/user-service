@@ -559,6 +559,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidSellerShopProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerShopProfile(InvalidSellerShopProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
