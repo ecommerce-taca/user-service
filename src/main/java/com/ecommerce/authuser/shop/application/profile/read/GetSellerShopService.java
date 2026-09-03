@@ -33,7 +33,10 @@ public class GetSellerShopService {
         List<UserRole> assignments = userRoleRepository
                 .findAllByUser_IdAndRevokedAtIsNull(userId);
 
-        Shop shop = resolveAccessibleShop(assignments);
+        Shop shop = resolveAccessibleShop(
+                assignments,
+                userId
+        );
 
         if (shop.getDeletedAt() != null) {
             throw new ShopNotFoundException();
@@ -56,7 +59,10 @@ public class GetSellerShopService {
         );
     }
 
-    private Shop resolveAccessibleShop(List<UserRole> assignments) {
+    private Shop resolveAccessibleShop(
+            List<UserRole> assignments,
+            UUID userId
+    ) {
 
         List<Shop> ownedShops =
                 assignments
@@ -72,6 +78,7 @@ public class GetSellerShopService {
                         .map(UserRole::getShop)
                         .filter(java.util.Objects::nonNull)
                         .filter(shop -> shop.getDeletedAt() == null)
+                        .filter(shop -> isOwnedBy(shop, userId))
                         .distinct()
                         .toList();
 
@@ -105,6 +112,16 @@ public class GetSellerShopService {
         }
 
         throw new SellerPermissionDeniedException();
+    }
+
+    private boolean isOwnedBy(
+            Shop shop,
+            UUID userId
+    ) {
+
+        return shop.getOwner() != null
+                && shop.getOwner().getId() != null
+                && shop.getOwner().getId().equals(userId);
     }
 
     private String maskTaxCode(String taxCode) {
