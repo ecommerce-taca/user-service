@@ -77,17 +77,14 @@ public class GetSellerShopService {
                         )
                         .map(UserRole::getShop)
                         .filter(java.util.Objects::nonNull)
-                        .filter(shop -> shop.getDeletedAt() == null)
                         .filter(shop -> isOwnedBy(shop, userId))
                         .distinct()
                         .toList();
 
-        if (ownedShops.size() == 1) {
-            return ownedShops.getFirst();
-        }
+        Shop ownedShop = resolveSingleCandidate(ownedShops);
 
-        if (ownedShops.size() > 1) {
-            throw new SellerPermissionDeniedException();
+        if (ownedShop != null) {
+            return ownedShop;
         }
 
         List<Shop> staffShops =
@@ -103,15 +100,41 @@ public class GetSellerShopService {
                         )
                         .map(UserRole::getShop)
                         .filter(java.util.Objects::nonNull)
-                        .filter(shop -> shop.getDeletedAt() == null)
                         .distinct()
                         .toList();
 
-        if (staffShops.size() == 1) {
-            return staffShops.getFirst();
+        Shop staffShop = resolveSingleCandidate(staffShops);
+
+        if (staffShop != null) {
+            return staffShop;
         }
 
         throw new SellerPermissionDeniedException();
+    }
+
+    private Shop resolveSingleCandidate(List<Shop> shops) {
+        List<Shop> liveShops = shops
+                .stream()
+                .filter(shop -> shop.getDeletedAt() == null)
+                .toList();
+
+        if (liveShops.size() == 1) {
+            return liveShops.getFirst();
+        }
+
+        if (liveShops.size() > 1) {
+            throw new SellerPermissionDeniedException();
+        }
+        
+        if (shops.size() == 1) {
+            return shops.getFirst();
+        }
+
+        if (shops.size() > 1) {
+            throw new SellerPermissionDeniedException();
+        }
+
+        return null;
     }
 
     private boolean isOwnedBy(
