@@ -541,6 +541,33 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidSellerBankException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerBank(InvalidSellerBankException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(BankAccountInvalidException.class)
+    public ResponseEntity<ApiErrorResponse> handleBankAccountInvalid(BankAccountInvalidException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "BANK_ACCOUNT_INVALID",
+                "Thông tin tài khoản ngân hàng chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerShopProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerShopProfile(InvalidSellerShopProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

@@ -9,6 +9,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -178,6 +179,131 @@ public class Shop {
         }
 
         this.kycStatus = KycStatus.PENDING;
+    }
+
+    public void updateBankAccount(
+            String bankCode,
+            String bankName,
+            String accountName,
+            String accountLast4,
+            byte[] accountCiphertext,
+            String keyVersion,
+            Instant verifiedAt
+    ) {
+
+        if (!canEditOnboarding()) {
+            throw new IllegalStateException(
+                    "Shop is not editable during onboarding"
+            );
+        }
+
+        if (bankCode == null
+                || bankCode.isBlank()
+                || bankCode.length() > 32) {
+            throw new IllegalArgumentException(
+                    "Invalid bank code"
+            );
+        }
+
+        if (bankName == null
+                || bankName.isBlank()
+                || bankName.length() > 120) {
+            throw new IllegalArgumentException(
+                    "Invalid bank name"
+            );
+        }
+
+        if (accountName == null
+                || accountName.isBlank()
+                || accountName.length() > 120) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account name"
+            );
+        }
+
+        if (accountLast4 == null || !accountLast4.matches("\\d{4}")) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account last4"
+            );
+        }
+
+        if (accountCiphertext == null
+                || accountCiphertext.length == 0
+                || accountCiphertext.length > 2048) {
+            throw new IllegalArgumentException(
+                    "Invalid bank account ciphertext"
+            );
+        }
+
+        if (keyVersion == null
+                || keyVersion.isBlank()
+                || keyVersion.length() > 32) {
+            throw new IllegalArgumentException(
+                    "Invalid bank key version"
+            );
+        }
+
+        this.bankCode = bankCode;
+        this.bankName = bankName;
+        this.bankAccountName = accountName;
+        this.bankAccountLast4 = accountLast4;
+        this.bankAccountCiphertext = Arrays.copyOf(accountCiphertext, accountCiphertext.length);
+        this.bankKeyVersion = keyVersion;
+        this.bankVerifiedAt = verifiedAt;
+    }
+
+    public boolean canUpdateSellerProfile() {
+        return status == ShopStatus.DRAFT
+                || status == ShopStatus.ACTIVE;
+    }
+
+    public void updateSellerProfile(
+            boolean updateName,
+            String name,
+            boolean updateDescription,
+            String description,
+            boolean updateLogoObjectKey,
+            String logoObjectKey
+    ) {
+
+        if (!canUpdateSellerProfile()) {
+            throw new IllegalStateException(
+                    "Shop profile cannot be updated"
+            );
+        }
+
+        if (updateName) {
+
+            if (name == null
+                    || name.isBlank()
+                    || name.codePointCount(0, name.length()) > 120) {
+                throw new IllegalArgumentException(
+                        "Invalid shop name"
+                );
+            }
+
+            this.name = name;
+        }
+
+        if (updateDescription) {
+            if (description != null && description.codePointCount(0, description.length()) > 2000) {
+                throw new IllegalArgumentException(
+                        "Invalid shop description"
+                );
+            }
+
+            this.description = description;
+        }
+
+        if (updateLogoObjectKey) {
+            if (logoObjectKey != null && logoObjectKey.length() > 512) {
+                throw new IllegalArgumentException(
+                        "Invalid logo object key"
+                );
+            }
+
+            this.logoObjectKey = logoObjectKey;
+        }
     }
 
     @PrePersist
