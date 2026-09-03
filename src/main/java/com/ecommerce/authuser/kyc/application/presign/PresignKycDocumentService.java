@@ -83,7 +83,7 @@ public class PresignKycDocumentService {
             throw new SellerPermissionDeniedException();
         }
 
-        if (!shop.canEditOnboarding()) {
+        if (!shop.canManageKycDocuments()) {
             throw new ShopInvalidStateException();
         }
 

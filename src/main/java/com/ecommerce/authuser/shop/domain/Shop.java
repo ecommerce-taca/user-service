@@ -161,6 +161,11 @@ public class Shop {
                 && status != ShopStatus.DELETED;
     }
 
+    public boolean canManageKycDocuments() {
+        return status == ShopStatus.DRAFT
+                || status == ShopStatus.ACTIVE;
+    }
+
     public void markKycPending() {
         if (!canSubmitKyc()) {
             throw new IllegalStateException(

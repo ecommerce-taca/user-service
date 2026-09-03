@@ -75,7 +75,7 @@ public class CompleteKycDocumentService {
             throw new SellerPermissionDeniedException();
         }
 
-        if (!shop.canEditOnboarding()) {
+        if (!shop.canManageKycDocuments()) {
             throw new ShopInvalidStateException();
         }
 
