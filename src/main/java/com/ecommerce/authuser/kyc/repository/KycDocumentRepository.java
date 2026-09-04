@@ -67,4 +67,22 @@ public interface KycDocumentRepository extends JpaRepository<KycDocument, UUID> 
             @Param("documentId") UUID documentId,
             @Param("shopId") UUID shopId
     );
+
+    @Query("""
+        select
+            document.kycCase.id as kycCaseId,
+            count(document.id) as documentCount
+        from KycDocument document
+        where document.kycCase.id in :caseIds
+            and document.deletedAt is null
+        group by document.kycCase.id
+        """)
+    List<CaseDocumentCount> countLiveDocumentsByCaseIds(
+            @Param("caseIds") Collection<UUID> caseIds
+    );
+
+    interface CaseDocumentCount {
+        UUID getKycCaseId();
+        long getDocumentCount();
+    }
 }

@@ -48,4 +48,47 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
     Optional<KycCase> findFirstByShop_IdOrderByCreatedAtDesc(
             UUID shopId
     );
+
+    @Query(
+            value = """
+                select k
+                from KycCase k
+                join fetch k.shop shop
+                where k.status = :status
+                    and (
+                        :q is null
+                        or locate(
+                            lower(:q),
+                            lower(shop.name)
+                        ) > 0
+                        or (
+                            :taxCode is not null
+                            and shop.taxCode = :taxCode
+                        )
+                    )
+                """,
+            countQuery = """
+                select count(k)
+                from KycCase k
+                join k.shop shop
+                where k.status = :status
+                    and (
+                        :q is null
+                        or locate(
+                            lower(:q),
+                            lower(shop.name)
+                        ) > 0
+                        or (
+                            :taxCode is not null
+                            and shop.taxCode = :taxCode
+                        )
+                    )
+                """
+    )
+    Page<KycCase> findAdminQueue(
+            @Param("status") KycStatus status,
+            @Param("q") String q,
+            @Param("taxCode") String taxCode,
+            Pageable pageable
+    );
 }

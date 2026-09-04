@@ -568,6 +568,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidAdminKycQueueQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminKycQueueQuery(InvalidAdminKycQueueQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminKycPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminKycPermissionDenied(AdminKycPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
