@@ -55,6 +55,13 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
                 from KycCase k
                 join fetch k.shop shop
                 where k.status = :status
+                    and shop.deletedAt is null
+                    and not exists (
+                        select newer.id
+                        from KycCase newer
+                        where newer.shop.id = shop.id
+                            and newer.sourceVersion > k.sourceVersion
+                    )
                     and (
                         :q is null
                         or locate(
@@ -72,6 +79,13 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
                 from KycCase k
                 join k.shop shop
                 where k.status = :status
+                    and shop.deletedAt is null
+                    and not exists (
+                        select newer.id
+                        from KycCase newer
+                        where newer.shop.id = shop.id
+                            and newer.sourceVersion > k.sourceVersion
+                    )
                     and (
                         :q is null
                         or locate(
