@@ -6,6 +6,7 @@ import com.ecommerce.authuser.audit.repository.AuditLogRepository;
 
 import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
 
+import com.ecommerce.authuser.mfa.application.admin.AdminStepUpService;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -55,7 +56,7 @@ public class AdminRoleAssignmentService {
 
     private final AdminRbacAuthorizationService authorizationService;
 
-    private final AdminRbacStepUpService stepUpService;
+    private final AdminStepUpService stepUpService;
 
     private final AdminRoleAssignmentPolicy assignmentPolicy;
 
@@ -475,7 +476,7 @@ public class AdminRoleAssignmentService {
                     shop.getId().toString()
             );
         }
-        
+
         payload.put(
                 "action",
 

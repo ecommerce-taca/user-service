@@ -1,4 +1,4 @@
-package com.ecommerce.authuser.rbac.application.admin.roles.assignment;
+package com.ecommerce.authuser.mfa.application.admin;
 
 import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
 import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredException;
@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AdminRbacStepUpService {
+public class AdminStepUpService {
 
     private static final Duration CHALLENGE_TTL = Duration.ofMinutes(5);
 

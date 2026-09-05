@@ -50,6 +50,14 @@ public class AdminRbacAuthorizationService {
         ) > 0;
     }
 
+    @Transactional(readOnly = true)
+    public void requireUserSuspend(UUID actorUserId) {
+        requireSystemPermissionOrSuperAdmin(
+                actorUserId,
+                RbacKeys.Permissions.USER_SUSPEND
+        );
+    }
+
     private void requireSystemPermissionOrSuperAdmin(
             UUID actorUserId,
             String permissionKey

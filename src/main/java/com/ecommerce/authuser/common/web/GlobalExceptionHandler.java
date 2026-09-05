@@ -14,6 +14,8 @@ import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
 import com.ecommerce.authuser.shop.exception.*;
+import com.ecommerce.authuser.user.exception.admin.AdminUserStatusConflictException;
+import com.ecommerce.authuser.user.exception.admin.InvalidAdminUserStatusRequestException;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
@@ -650,6 +652,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "RBAC_ASSIGNMENT_NOT_FOUND",
                 "Không tìm thấy quyền cần thu hồi."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminUserStatusRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminUserStatusRequest(InvalidAdminUserStatusRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminUserStatusConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminUserStatusConflict(AdminUserStatusConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_ACCOUNT_SUSPENDED",
+                "Trạng thái tài khoản hiện tại không cho phép thao tác."
         );
     }
 

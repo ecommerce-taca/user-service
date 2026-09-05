@@ -317,4 +317,32 @@ public class User {
             this.dateOfBirth = dateOfBirth;
         }
     }
+
+    public void suspend() {
+        if (status != UserStatus.ACTIVE && status != UserStatus.LOCKED) {
+            throw new IllegalStateException(
+                    "User cannot be suspended"
+            );
+        }
+
+        status = UserStatus.SUSPENDED;
+
+        lockedUntil = null;
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
+    }
+
+    public void restore() {
+        if (status != UserStatus.SUSPENDED) {
+            throw new IllegalStateException(
+                    "User cannot be restored"
+            );
+        }
+
+        status = UserStatus.ACTIVE;
+
+        lockedUntil = null;
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
+    }
 }
