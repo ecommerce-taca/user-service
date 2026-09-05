@@ -30,6 +30,10 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
             UUID shopId,
             Collection<KycStatus> statuses
     );
+    
+    Optional<KycCase> findFirstByShop_IdOrderBySourceVersionDesc(
+            UUID shopId
+    );
 
     Page<KycCase> findAllByStatus(
             KycStatus status,

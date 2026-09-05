@@ -586,6 +586,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(KycCaseNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycCaseNotFound(KycCaseNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "KYC_CASE_NOT_FOUND",
+                "Không tìm thấy hồ sơ KYC."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
