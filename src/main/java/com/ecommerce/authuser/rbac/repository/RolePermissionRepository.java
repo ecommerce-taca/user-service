@@ -29,4 +29,14 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
             @Param("roleIds")
             Collection<UUID> roleIds
     );
+
+    @Query("""
+        select rp.permission.permissionKey
+        from RolePermission rp
+        where rp.role.id = :roleId
+        order by rp.permission.permissionKey asc
+        """)
+    List<String> findPermissionKeysByRoleId(
+            @Param("roleId") UUID roleId
+    );
 }

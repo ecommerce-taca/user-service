@@ -10,6 +10,9 @@ import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import com.ecommerce.authuser.kyc.exception.*;
 import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
+import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
 import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
@@ -620,6 +623,33 @@ public class GlobalExceptionHandler {
                 HttpStatus.FORBIDDEN,
                 "RBAC_PERMISSION_DENIED",
                 "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidRoleAssignmentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidRoleAssignment(InvalidRoleAssignmentException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "RBAC_INVALID_ROLE",
+                "Vai trò hoặc phạm vi không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentExists(RoleAssignmentExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_EXISTS",
+                "Quyền này đã được cấp."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentNotFound(RoleAssignmentNotFoundException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_NOT_FOUND",
+                "Không tìm thấy quyền cần thu hồi."
         );
     }
 

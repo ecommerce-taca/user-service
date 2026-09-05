@@ -23,30 +23,56 @@ public class AdminRbacAuthorizationService {
 
     @Transactional(readOnly = true)
     public void requireRoleRead(UUID actorUserId) {
+        requireSystemPermissionOrSuperAdmin(
+                actorUserId,
+                RbacKeys.Permissions.ROLE_READ
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public void requireRoleAssign(UUID actorUserId) {
+        requireSystemPermissionOrSuperAdmin(
+                actorUserId,
+                RbacKeys.Permissions.ROLE_ASSIGN
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isSuperAdmin(UUID actorUserId) {
+        if (actorUserId == null) {
+            return false;
+        }
+
+        return userRoleRepository.countActiveRoles(
+                actorUserId,
+                List.of(RbacKeys.Roles.SUPER_ADMIN),
+                ScopeType.SYSTEM
+        ) > 0;
+    }
+
+    private void requireSystemPermissionOrSuperAdmin(
+            UUID actorUserId,
+            String permissionKey
+    ) {
         if (actorUserId == null) {
             throw new AdminRbacPermissionDeniedException();
         }
 
-        boolean hasRoleRead = userRoleRepository
-                .existsActivePermission(
+        boolean hasPermission =
+                userRoleRepository.existsActivePermission(
                         actorUserId,
-                        RbacKeys.Permissions.ROLE_READ,
+                        permissionKey,
                         ScopeType.SYSTEM
                 );
 
-        if (hasRoleRead) {
+        if (hasPermission) {
             return;
         }
 
-        long superAdminCount = userRoleRepository
-                .countActiveRoles(
-                        actorUserId,
-                        List.of(RbacKeys.Roles.SUPER_ADMIN),
-                        ScopeType.SYSTEM
-                );
-
-        if (superAdminCount == 0) {
-            throw new AdminRbacPermissionDeniedException();
+        if (isSuperAdmin(actorUserId)) {
+            return;
         }
+
+        throw new AdminRbacPermissionDeniedException();
     }
 }
