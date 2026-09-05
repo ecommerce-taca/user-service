@@ -68,4 +68,17 @@ public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
             @Param("roleKeys") Collection<String> roleKeys,
             @Param("scopeType") ScopeType scopeType
     );
+
+    @Query("""
+        select ur
+        from UserRole ur
+        join fetch ur.role role
+        left join fetch ur.shop shop
+        where ur.user.id = :userId
+            and ur.revokedAt is null
+        order by ur.grantedAt asc, ur.id asc
+        """)
+    List<UserRole> findActiveAssignmentsWithRoleAndShop(
+            @Param("userId") UUID userId
+    );
 }

@@ -9,6 +9,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenE
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import com.ecommerce.authuser.kyc.exception.*;
+import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
 import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
@@ -610,6 +611,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "KYC_DECISION_INVALID",
                 "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminRbacPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminRbacPermissionDenied(AdminRbacPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
         );
     }
 
