@@ -50,3 +50,7 @@ auth:
   jwt:
     private-key-base64: ${AUTH_JWT_PRIVATE_KEY_BASE64}
     public-key-base64: ${AUTH_JWT_PUBLIC_KEY_BASE64}
+    key-id: ${JWT_KEY_ID:auth-user-key-local-1}
+
+    previous-key-id: ${JWT_PREVIOUS_KEY_ID:}
+    previous-public-key-base64: ${JWT_PREVIOUS_PUBLIC_KEY_BASE64:}

@@ -1,6 +1,14 @@
 package com.ecommerce.authuser.auth.config;
 
 import com.ecommerce.authuser.auth.security.AccessSessionTokenValidator;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import org.springframework.context.annotation.Bean;
@@ -23,7 +31,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(JwtKeyProperties.class)
@@ -34,6 +44,10 @@ public class JwtKeyConfiguration {
     @Bean
     public KeyPair jwtKeyPair(JwtKeyProperties properties) {
         try {
+            requireConfigured(
+                    properties.keyId(),
+                    "auth.jwt.key-id"
+            );
 
             String privateKeyBase64 =
                     requireConfigured(
@@ -98,24 +112,49 @@ public class JwtKeyConfiguration {
     @Bean
     public JwtDecoder jwtDecoder(
             KeyPair jwtKeyPair,
+            JwtKeyProperties properties,
             AccessSessionTokenValidator accessSessionTokenValidator
     ) {
 
-        RSAPublicKey publicKey =
-                (RSAPublicKey) jwtKeyPair.getPublic();
+        RSAPublicKey currentPublicKey =
+                (RSAPublicKey)
+                        jwtKeyPair.getPublic();
 
-        NimbusJwtDecoder decoder =
-                NimbusJwtDecoder
-                        .withPublicKey(publicKey)
-                        .build();
+        String currentKeyId =
+                requireConfigured(
+                        properties.keyId(),
+                        "auth.jwt.key-id"
+                );
 
-        OAuth2TokenValidator<Jwt>
-                issuerValidator =
+        List<JWK> verificationKeys = new ArrayList<>();
+
+        verificationKeys.add(
+                toVerificationJwk(
+                        currentKeyId,
+                        currentPublicKey
+                )
+        );
+
+        addPreviousVerificationKey(
+                verificationKeys,
+                properties,
+                currentKeyId
+        );
+
+        JWKSource<SecurityContext> jwkSource =
+                new ImmutableJWKSet<>(
+                        new JWKSet(verificationKeys)
+                );
+
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
+                .withJwkSource(jwkSource)
+                .build();
+
+        OAuth2TokenValidator<Jwt> issuerValidator =
                 JwtValidators
                         .createDefaultWithIssuer("auth-user-service");
 
-        OAuth2TokenValidator<Jwt>
-                audienceValidator =
+        OAuth2TokenValidator<Jwt> audienceValidator =
                 jwt -> {
 
                     if (jwt.getAudience().contains("taca-api")) {
@@ -144,6 +183,90 @@ public class JwtKeyConfiguration {
         return decoder;
     }
 
+    private static RSAKey toVerificationJwk(
+            String keyId,
+            RSAPublicKey publicKey
+    ) {
+
+        validatePublicKey(publicKey);
+
+        return new RSAKey
+                .Builder(publicKey)
+                .keyID(keyId)
+                .keyUse(KeyUse.SIGNATURE)
+                .algorithm(JWSAlgorithm.RS256)
+                .build();
+    }
+
+    private static void addPreviousVerificationKey(
+            List<JWK> verificationKeys,
+            JwtKeyProperties properties,
+            String currentKeyId
+    ) {
+
+        boolean hasPreviousKeyId = hasText(properties.previousKeyId());
+
+        boolean hasPreviousPublicKey = hasText(properties.previousPublicKeyBase64());
+
+        if (hasPreviousKeyId
+                != hasPreviousPublicKey) {
+
+            throw new IllegalStateException(
+                    "Previous JWT key configuration is incomplete"
+            );
+        }
+
+        if (!hasPreviousKeyId) {
+            return;
+        }
+
+        String previousKeyId =
+                properties.previousKeyId()
+                        .strip();
+
+        if (currentKeyId.equals(
+                previousKeyId
+        )) {
+
+            throw new IllegalStateException(
+                    "Current and previous JWT key ids must differ"
+            );
+        }
+
+        RSAPublicKey previousPublicKey =
+                decodePublicKey(
+                        properties
+                                .previousPublicKeyBase64()
+                );
+
+        verificationKeys.add(
+                toVerificationJwk(
+                        previousKeyId,
+                        previousPublicKey
+                )
+        );
+    }
+
+    private static RSAPublicKey decodePublicKey(String encoded) {
+        try {
+            byte[] publicKeyBytes =
+                    decodeBase64(encoded, "previous public key");
+
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            return (RSAPublicKey)
+                    keyFactory.generatePublic(
+                            new X509EncodedKeySpec(publicKeyBytes)
+                    );
+
+        } catch (GeneralSecurityException | ClassCastException ex) {
+            throw new IllegalStateException(
+                    "Invalid previous JWT RSA public key",
+                    ex
+            );
+        }
+    }
+
     private static String requireConfigured(
             String value,
             String property
@@ -165,10 +288,7 @@ public class JwtKeyConfiguration {
     ) {
 
         try {
-
-            return Base64
-                    .getDecoder()
-                    .decode(encoded);
+            return Base64.getDecoder().decode(encoded);
 
         } catch (IllegalArgumentException ex) {
             throw new IllegalStateException(
@@ -185,13 +305,19 @@ public class JwtKeyConfiguration {
 
         if (!privateKey
                 .getModulus()
-                .equals(publicKey.getModulus()
-                )) {
+                .equals(publicKey.getModulus())) {
 
             throw new IllegalStateException(
                     "JWT private/public keys do not match"
             );
         }
+
+        validatePublicKey(publicKey);
+    }
+
+    private static void validatePublicKey(
+            RSAPublicKey publicKey
+    ) {
 
         if (publicKey.getModulus().bitLength() < MIN_RSA_BITS) {
             throw new IllegalStateException(
@@ -200,5 +326,15 @@ public class JwtKeyConfiguration {
                             + " bits"
             );
         }
+
+        if (publicKey.getPublicExponent().signum() <= 0) {
+            throw new IllegalStateException(
+                    "Invalid JWT RSA public exponent"
+            );
+        }
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }
