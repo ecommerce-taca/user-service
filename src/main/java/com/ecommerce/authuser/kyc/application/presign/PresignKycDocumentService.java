@@ -161,14 +161,13 @@ public class PresignKycDocumentService {
 
     private KycCase resolveEditableCase(Shop shop) {
 
-        List<KycCase> cases = kycCaseRepository
-                .findAllByShop_IdOrderByCreatedAtDesc(shop.getId());
+        KycCase latest = kycCaseRepository
+                .findCurrentByShopIdForUpdate(shop.getId())
+                .orElse(null);
 
-        if (cases.isEmpty()) {
+        if (latest == null) {
             return createDraftCase(shop, 1);
         }
-
-        KycCase latest = cases.getFirst();
 
         KycStatus status = latest.getStatus();
 

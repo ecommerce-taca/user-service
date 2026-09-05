@@ -32,4 +32,15 @@ public interface KycObjectStoragePort {
             String sha256
     ) {
     }
+
+    DownloadResult presignDownload(
+            String objectKey,
+            Duration ttl
+    );
+
+    record DownloadResult(
+            String downloadUrl,
+            Instant expiresAt
+    ) {
+    }
 }

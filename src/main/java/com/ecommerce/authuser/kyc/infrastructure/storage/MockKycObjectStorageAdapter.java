@@ -64,4 +64,34 @@ public class MockKycObjectStorageAdapter implements KycObjectStoragePort {
                 objects.get(objectKey)
         );
     }
+
+    @Override
+    public DownloadResult presignDownload(
+            String objectKey,
+            Duration ttl
+    ) {
+
+        if (objectKey == null || objectKey.isBlank()) {
+            throw new IllegalArgumentException(
+                    "objectKey must not be blank"
+            );
+        }
+
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            throw new IllegalArgumentException(
+                    "ttl must be positive"
+            );
+        }
+
+        Instant expiresAt = Instant.now().plus(ttl);
+
+        String downloadUrl =
+                "https://storage.example/mock-download/"
+                        + UuidV7Generator.generate();
+
+        return new DownloadResult(
+                downloadUrl,
+                expiresAt
+        );
+    }
 }

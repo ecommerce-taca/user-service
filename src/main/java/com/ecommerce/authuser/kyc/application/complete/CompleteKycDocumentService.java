@@ -79,24 +79,14 @@ public class CompleteKycDocumentService {
             throw new ShopInvalidStateException();
         }
 
-        UUID kycCaseId = kycDocumentRepository
-                .findKycCaseIdByDocumentIdAndShopId(
-                        command.documentId(),
-                        shop.getId()
-                )
-                .orElseThrow(KycDocumentNotFoundException::new);
-
         KycCase kycCase = kycCaseRepository
-                .findByIdForUpdate(kycCaseId)
+                .findCurrentByShopIdForUpdate(shop.getId())
                 .orElseThrow(KycDocumentNotFoundException::new);
 
         validateCaseState(kycCase);
 
         KycDocument document = kycDocumentRepository
-                .findByIdAndShopIdForUpdate(
-                        command.documentId(),
-                        shop.getId()
-                )
+                .findByIdAndKycCaseIdForUpdate(command.documentId(), kycCase.getId())
                 .orElseThrow(KycDocumentNotFoundException::new);
 
         validateDocumentState(document);

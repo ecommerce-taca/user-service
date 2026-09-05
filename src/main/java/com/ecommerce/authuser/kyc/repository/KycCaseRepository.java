@@ -30,6 +30,10 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
             UUID shopId,
             Collection<KycStatus> statuses
     );
+    
+    Optional<KycCase> findFirstByShop_IdOrderBySourceVersionDesc(
+            UUID shopId
+    );
 
     Page<KycCase> findAllByStatus(
             KycStatus status,
@@ -47,5 +51,77 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<KycCase> findFirstByShop_IdOrderByCreatedAtDesc(
             UUID shopId
+    );
+
+    @Query(
+            value = """
+                select k
+                from KycCase k
+                join fetch k.shop shop
+                where k.status = :status
+                    and shop.deletedAt is null
+                    and not exists (
+                        select newer.id
+                        from KycCase newer
+                        where newer.shop.id = shop.id
+                            and newer.sourceVersion > k.sourceVersion
+                    )
+                    and (
+                        :q is null
+                        or locate(
+                            lower(:q),
+                            lower(shop.name)
+                        ) > 0
+                        or (
+                            :taxCode is not null
+                            and shop.taxCode = :taxCode
+                        )
+                    )
+                """,
+            countQuery = """
+                select count(k)
+                from KycCase k
+                join k.shop shop
+                where k.status = :status
+                    and shop.deletedAt is null
+                    and not exists (
+                        select newer.id
+                        from KycCase newer
+                        where newer.shop.id = shop.id
+                            and newer.sourceVersion > k.sourceVersion
+                    )
+                    and (
+                        :q is null
+                        or locate(
+                            lower(:q),
+                            lower(shop.name)
+                        ) > 0
+                        or (
+                            :taxCode is not null
+                            and shop.taxCode = :taxCode
+                        )
+                    )
+                """
+    )
+    Page<KycCase> findAdminQueue(
+            @Param("status") KycStatus status,
+            @Param("q") String q,
+            @Param("taxCode") String taxCode,
+            Pageable pageable
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select k
+        from KycCase k
+        where k.shop.id = :shopId
+            and k.sourceVersion = (
+                select max(newer.sourceVersion)
+                from KycCase newer
+                where newer.shop.id = :shopId
+            )
+        """)
+    Optional<KycCase> findCurrentByShopIdForUpdate(
+            @Param("shopId") UUID shopId
     );
 }

@@ -67,4 +67,47 @@ public interface KycDocumentRepository extends JpaRepository<KycDocument, UUID> 
             @Param("documentId") UUID documentId,
             @Param("shopId") UUID shopId
     );
+
+    @Query("""
+        select
+            document.kycCase.id as kycCaseId,
+            count(document.id) as documentCount
+        from KycDocument document
+        where document.kycCase.id in :caseIds
+            and document.deletedAt is null
+        group by document.kycCase.id
+        """)
+    List<CaseDocumentCount> countLiveDocumentsByCaseIds(
+            @Param("caseIds") Collection<UUID> caseIds
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select document
+        from KycDocument document
+        where document.kycCase.id = :kycCaseId
+            and document.deletedAt is null
+        order by document.createdAt asc
+        """)
+    List<KycDocument> findAllLiveByKycCaseIdForUpdate(
+            @Param("kycCaseId") UUID kycCaseId
+    );
+
+    interface CaseDocumentCount {
+        UUID getKycCaseId();
+        long getDocumentCount();
+    }
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select document
+        from KycDocument document
+        where document.id = :documentId
+            and document.kycCase.id = :kycCaseId
+            and document.deletedAt is null
+        """)
+    Optional<KycDocument> findByIdAndKycCaseIdForUpdate(
+            @Param("documentId") UUID documentId,
+            @Param("kycCaseId") UUID kycCaseId
+    );
 }

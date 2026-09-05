@@ -568,6 +568,51 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidAdminKycQueueQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminKycQueueQuery(InvalidAdminKycQueueQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminKycPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminKycPermissionDenied(AdminKycPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(KycCaseNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycCaseNotFound(KycCaseNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "KYC_CASE_NOT_FOUND",
+                "Không tìm thấy hồ sơ KYC."
+        );
+    }
+
+    @ExceptionHandler(InvalidKycReviewRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidKycReviewRequest(InvalidKycReviewRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(KycDecisionConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDecisionConflict(KycDecisionConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,
