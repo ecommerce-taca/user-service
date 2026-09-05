@@ -9,7 +9,13 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenE
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import com.ecommerce.authuser.kyc.exception.*;
+import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
+import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
 import com.ecommerce.authuser.shop.exception.*;
+import com.ecommerce.authuser.user.exception.admin.AdminUserStatusConflictException;
+import com.ecommerce.authuser.user.exception.admin.InvalidAdminUserStatusRequestException;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
 import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
@@ -610,6 +616,60 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "KYC_DECISION_INVALID",
                 "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminRbacPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminRbacPermissionDenied(AdminRbacPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidRoleAssignmentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidRoleAssignment(InvalidRoleAssignmentException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "RBAC_INVALID_ROLE",
+                "Vai trò hoặc phạm vi không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentExists(RoleAssignmentExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_EXISTS",
+                "Quyền này đã được cấp."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentNotFound(RoleAssignmentNotFoundException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_NOT_FOUND",
+                "Không tìm thấy quyền cần thu hồi."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminUserStatusRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminUserStatusRequest(InvalidAdminUserStatusRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminUserStatusConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminUserStatusConflict(AdminUserStatusConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_ACCOUNT_SUSPENDED",
+                "Trạng thái tài khoản hiện tại không cho phép thao tác."
         );
     }
 
