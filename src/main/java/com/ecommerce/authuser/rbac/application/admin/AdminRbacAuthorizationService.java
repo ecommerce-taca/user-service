@@ -58,29 +58,41 @@ public class AdminRbacAuthorizationService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasSystemPermissionOrSuperAdmin(
+            UUID actorUserId,
+            String permissionKey
+    ) {
+
+        if (actorUserId == null
+                || permissionKey == null
+                || permissionKey.isBlank()) {
+            return false;
+        }
+
+        if (userRoleRepository.existsActivePermission(
+                actorUserId,
+                permissionKey,
+                ScopeType.SYSTEM
+        )) {
+            return true;
+        }
+
+        return isSuperAdmin(actorUserId);
+    }
+
+
     private void requireSystemPermissionOrSuperAdmin(
             UUID actorUserId,
             String permissionKey
     ) {
-        if (actorUserId == null) {
+
+        if (!hasSystemPermissionOrSuperAdmin(
+                actorUserId,
+                permissionKey
+        )) {
+
             throw new AdminRbacPermissionDeniedException();
         }
-
-        boolean hasPermission =
-                userRoleRepository.existsActivePermission(
-                        actorUserId,
-                        permissionKey,
-                        ScopeType.SYSTEM
-                );
-
-        if (hasPermission) {
-            return;
-        }
-
-        if (isSuperAdmin(actorUserId)) {
-            return;
-        }
-
-        throw new AdminRbacPermissionDeniedException();
     }
 }

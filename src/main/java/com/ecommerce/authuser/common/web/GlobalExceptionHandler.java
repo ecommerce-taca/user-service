@@ -1,6 +1,7 @@
 package com.ecommerce.authuser.common.web;
 
 import com.ecommerce.authuser.address.exception.*;
+import com.ecommerce.authuser.audit.exception.InvalidAdminAuditQueryException;
 import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
@@ -670,6 +671,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "AUTH_ACCOUNT_SUSPENDED",
                 "Trạng thái tài khoản hiện tại không cho phép thao tác."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminAuditQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminAuditQuery(InvalidAdminAuditQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu truy vấn không hợp lệ."
         );
     }
 
