@@ -25,6 +25,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/.well-known/jwks.json"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
                                         HttpMethod.POST,
                                         "/api/v1/auth/signup",
                                         "/api/v1/auth/signin",

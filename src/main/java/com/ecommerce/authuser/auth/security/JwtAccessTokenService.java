@@ -1,9 +1,12 @@
 package com.ecommerce.authuser.auth.security;
 
+import com.ecommerce.authuser.auth.config.JwtKeyProperties;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -23,6 +26,8 @@ public class JwtAccessTokenService implements AccessTokenService {
     private static final String AUDIENCE = "taca-api";
 
     private final JwtEncoder jwtEncoder;
+
+    private final JwtKeyProperties jwtKeyProperties;
 
     @Override
     public String issue(
@@ -58,8 +63,13 @@ public class JwtAccessTokenService implements AccessTokenService {
                         .claim("email_verified", emailVerified)
                         .build();
 
+        JwsHeader headers = JwsHeader
+                .with(SignatureAlgorithm.RS256)
+                .keyId(jwtKeyProperties.keyId())
+                .build();
+
         return jwtEncoder
-                .encode(JwtEncoderParameters.from(claims))
+                .encode(JwtEncoderParameters.from(headers, claims))
                 .getTokenValue();
     }
 }
