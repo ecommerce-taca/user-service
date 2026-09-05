@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +51,21 @@ public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
     boolean existsActivePermission(
             @Param("userId") UUID userId,
             @Param("permissionKey") String permissionKey,
+            @Param("scopeType") ScopeType scopeType
+    );
+
+    @Query("""
+        select count(ur)
+            from UserRole ur
+            where ur.user.id = :userId
+                and ur.revokedAt is null
+                and ur.shop is null
+                and ur.role.scopeType = :scopeType
+                and ur.role.roleKey in :roleKeys
+        """)
+    long countActiveRoles(
+            @Param("userId") UUID userId,
+            @Param("roleKeys") Collection<String> roleKeys,
             @Param("scopeType") ScopeType scopeType
     );
 }

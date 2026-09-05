@@ -595,6 +595,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidKycReviewRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidKycReviewRequest(InvalidKycReviewRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(KycDecisionConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDecisionConflict(KycDecisionConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

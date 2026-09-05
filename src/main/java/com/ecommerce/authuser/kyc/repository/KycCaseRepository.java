@@ -109,4 +109,19 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
             @Param("taxCode") String taxCode,
             Pageable pageable
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select k
+        from KycCase k
+        where k.shop.id = :shopId
+            and k.sourceVersion = (
+                select max(newer.sourceVersion)
+                from KycCase newer
+                where newer.shop.id = :shopId
+            )
+        """)
+    Optional<KycCase> findCurrentByShopIdForUpdate(
+            @Param("shopId") UUID shopId
+    );
 }

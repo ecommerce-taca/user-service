@@ -311,6 +311,32 @@ public class Shop {
         }
     }
 
+    public void applyKycDecision(KycStatus decision) {
+        if (decision == null) {
+            throw new IllegalArgumentException(
+                    "KYC decision is required"
+            );
+        }
+
+        if (decision != KycStatus.APPROVED
+                && decision != KycStatus.NEEDS_INFO
+                && decision != KycStatus.REJECTED) {
+
+            throw new IllegalArgumentException(
+                    "Unsupported KYC decision"
+            );
+        }
+
+        if (status == ShopStatus.SUSPENDED
+                || status == ShopStatus.DELETED) {
+            throw new IllegalStateException(
+                    "Shop cannot receive KYC decision"
+            );
+        }
+
+        this.kycStatus = decision;
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

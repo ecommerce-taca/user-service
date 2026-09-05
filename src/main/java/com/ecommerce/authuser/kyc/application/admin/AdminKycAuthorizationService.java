@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -48,6 +49,27 @@ public class AdminKycAuthorizationService {
                         );
 
         if (!allowed) {
+            throw new AdminKycPermissionDeniedException();
+        }
+    }
+
+    public void requireKycDecide(UUID userId) {
+        requirePermission(
+                userId,
+                RbacKeys.Permissions.KYC_DECIDE
+        );
+
+        long allowedRoles =
+                userRoleRepository.countActiveRoles(
+                        userId,
+                        List.of(
+                                RbacKeys.Roles.RISK_MANAGER,
+                                RbacKeys.Roles.SUPER_ADMIN
+                        ),
+                        ScopeType.SYSTEM
+                );
+
+        if (allowedRoles == 0) {
             throw new AdminKycPermissionDeniedException();
         }
     }
