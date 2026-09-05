@@ -96,7 +96,7 @@ public class SubmitKycService {
         }
 
         KycCase kycCase = kycCaseRepository
-                .findFirstByShop_IdOrderByCreatedAtDesc(shop.getId())
+                .findCurrentByShopIdForUpdate(shop.getId())
                 .orElseThrow(InvalidKycDocumentException::new);
 
         validateKycCaseState(kycCase);

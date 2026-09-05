@@ -97,4 +97,17 @@ public interface KycDocumentRepository extends JpaRepository<KycDocument, UUID> 
         UUID getKycCaseId();
         long getDocumentCount();
     }
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select document
+        from KycDocument document
+        where document.id = :documentId
+            and document.kycCase.id = :kycCaseId
+            and document.deletedAt is null
+        """)
+    Optional<KycDocument> findByIdAndKycCaseIdForUpdate(
+            @Param("documentId") UUID documentId,
+            @Param("kycCaseId") UUID kycCaseId
+    );
 }
