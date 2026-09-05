@@ -9,6 +9,8 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.favorite.exception.FavoriteLimitReachedException;
+import com.ecommerce.authuser.favorite.exception.InvalidFavoriteInputException;
 import com.ecommerce.authuser.favorite.exception.InvalidFavoriteQueryException;
 import com.ecommerce.authuser.kyc.exception.*;
 import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
@@ -690,6 +692,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "AUTH_INVALID_INPUT",
                 "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidFavoriteInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFavoriteInput(InvalidFavoriteInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(FavoriteLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleFavoriteLimitReached(FavoriteLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "FAVORITE_LIMIT_REACHED",
+                "Bạn đã đạt giới hạn số sản phẩm yêu thích."
         );
     }
 
