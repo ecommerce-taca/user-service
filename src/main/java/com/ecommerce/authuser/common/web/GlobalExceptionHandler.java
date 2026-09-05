@@ -9,6 +9,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.favorite.exception.InvalidFavoriteQueryException;
 import com.ecommerce.authuser.kyc.exception.*;
 import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
 import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
@@ -680,6 +681,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "AUTH_INVALID_INPUT",
                 "Dữ liệu truy vấn không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidFavoriteQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFavoriteQuery(InvalidFavoriteQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
         );
     }
 
