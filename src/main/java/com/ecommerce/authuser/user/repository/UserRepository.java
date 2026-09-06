@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByPhoneNormalized(String phoneNormalized);
 
+    Optional<User> findByIdAndDeletedAtIsNull(UUID userId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         select user

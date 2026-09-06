@@ -34,6 +34,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
             Instant now
     );
 
+    boolean existsByUser_IdAndFamilyIdAndRevokedAtIsNullAndExpiresAtAfter(
+            UUID userId,
+            UUID familyId,
+            Instant now
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         select token

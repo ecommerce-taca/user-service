@@ -155,20 +155,56 @@ public class KycCase {
             );
         }
 
-        if (decision == KycStatus.NEEDS_INFO || decision == KycStatus.REJECTED) {
-            if (reason == null
-                    || reason.trim().length() < 10
-                    || reason.trim().length() > 1000
-            ) {
-                throw new IllegalArgumentException(
-                        "Reason must contain 10-1000 characters"
-                );
-            }
-        }
+        String normalizedReason = normalizeDecisionReason(decision, reason);
 
         this.status = decision;
         this.reviewedBy = reviewerUserId;
         this.reviewedAt = now;
-        this.decisionReason = reason == null ? null : reason.trim();
+        this.decisionReason = normalizedReason;
+    }
+
+    private String normalizeDecisionReason(
+            KycStatus decision,
+            String reason
+    ) {
+
+        boolean required = decision == KycStatus.NEEDS_INFO
+                || decision == KycStatus.REJECTED;
+
+        if (reason == null) {
+            if (required) {
+                throw new IllegalArgumentException(
+                        "Reason must contain 10-1000 Unicode characters"
+                );
+            }
+
+            return null;
+        }
+
+        String normalized = reason.strip();
+
+        int length = normalized.codePointCount(0, normalized.length());
+
+        if (required) {
+            if (length < 10 || length > 1000) {
+                throw new IllegalArgumentException(
+                        "Reason must contain 10-1000 Unicode characters"
+                );
+            }
+
+            return normalized;
+        }
+
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        if (length > 1000) {
+            throw new IllegalArgumentException(
+                    "Reason must not exceed 1000 Unicode characters"
+            );
+        }
+
+        return normalized;
     }
 }

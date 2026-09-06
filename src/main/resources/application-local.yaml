@@ -27,6 +27,13 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+      timeout: ${REDIS_TIMEOUT:2s}
+
 auth:
   outbox:
     encryption-key-base64: ${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}
@@ -36,3 +43,14 @@ auth:
 
   otp:
     hash-key-base64: ${AUTH_OTP_HASH_KEY_BASE64}
+
+  mfa:
+    encryption-key-base64: ${AUTH_MFA_ENCRYPTION_KEY_BASE64}
+
+  jwt:
+    private-key-base64: ${AUTH_JWT_PRIVATE_KEY_BASE64}
+    public-key-base64: ${AUTH_JWT_PUBLIC_KEY_BASE64}
+    key-id: ${JWT_KEY_ID:auth-user-key-local-1}
+
+    previous-key-id: ${JWT_PREVIOUS_KEY_ID:}
+    previous-public-key-base64: ${JWT_PREVIOUS_PUBLIC_KEY_BASE64:}

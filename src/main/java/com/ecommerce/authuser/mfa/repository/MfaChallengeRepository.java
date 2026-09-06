@@ -42,4 +42,53 @@ public interface MfaChallengeRepository extends JpaRepository<MfaChallenge, UUID
             MfaPurpose purpose,
             Instant now
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select challenge
+        from MfaChallenge challenge
+        where challenge.user.id = :userId
+            and challenge.purpose = :purpose
+            and challenge.verifiedAt is null
+            and challenge.revokedAt is null
+            and challenge.expiresAt > :now
+        order by challenge.createdAt asc
+        """)
+    List<MfaChallenge> findActiveForUpdate(
+            @Param("userId") UUID userId,
+            @Param("purpose") MfaPurpose purpose,
+            @Param("now") Instant now
+    );
+
+    @Query("""
+        select new com.ecommerce.authuser.mfa.repository.MfaChallengeLookup(
+            challenge.id,
+            challenge.user.id,
+            challenge.purpose
+        )
+        from MfaChallenge challenge
+        where challenge.id = :challengeId
+        """)
+    Optional<MfaChallengeLookup> findLookupById(
+            @Param("challengeId") UUID challengeId
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select challenge
+        from MfaChallenge challenge
+        where challenge.user.id = :userId
+            and challenge.purpose = :purpose
+            and challenge.sessionId = :sessionId
+            and challenge.verifiedAt is null
+            and challenge.revokedAt is null
+            and challenge.expiresAt > :now
+        order by challenge.createdAt asc
+        """)
+    List<MfaChallenge> findActiveForSessionForUpdate(
+            @Param("userId") UUID userId,
+            @Param("purpose") MfaPurpose purpose,
+            @Param("sessionId") UUID sessionId,
+            @Param("now") Instant now
+    );
 }

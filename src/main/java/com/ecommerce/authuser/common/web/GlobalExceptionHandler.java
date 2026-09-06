@@ -1,14 +1,32 @@
 package com.ecommerce.authuser.common.web;
 
+import com.ecommerce.authuser.address.exception.*;
+import com.ecommerce.authuser.audit.exception.InvalidAdminAuditQueryException;
 import com.ecommerce.authuser.auth.exception.*;
+import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.favorite.exception.FavoriteLimitReachedException;
+import com.ecommerce.authuser.favorite.exception.InvalidFavoriteInputException;
+import com.ecommerce.authuser.favorite.exception.InvalidFavoriteQueryException;
+import com.ecommerce.authuser.kyc.exception.*;
+import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
+import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
+import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
+import com.ecommerce.authuser.shop.exception.*;
+import com.ecommerce.authuser.user.exception.admin.AdminUserStatusConflictException;
+import com.ecommerce.authuser.user.exception.admin.InvalidAdminUserStatusRequestException;
+import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
+import com.ecommerce.authuser.user.exception.profile.ProfilePhoneAlreadyExistsException;
+import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -89,7 +107,15 @@ public class GlobalExceptionHandler {
         return buildError(
                 HttpStatus.UNAUTHORIZED,
                 "AUTH_MFA_REQUIRED",
-                "Vui lòng xác thực 2FA."
+                "Vui lòng xác thực 2FA.",
+                java.util.Map.of(
+                        "challenge_id",
+                        ex.getChallengeId(),
+                        "expires_at",
+                        ex.getExpiresAt(),
+                        "methods",
+                        ex.getMethods()
+                )
         );
     }
 
@@ -122,10 +148,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MfaStepUpRequiredException.class)
     public ResponseEntity<ApiErrorResponse> handleMfaStepUpRequired(MfaStepUpRequiredException ex) {
+        Object details =
+                ex.getChallengeId() == null
+                        ? null
+                        : java.util.Map.of(
+                        "challenge_id",
+                        ex.getChallengeId(),
+                        "expires_at",
+                        ex.getExpiresAt(),
+                        "methods",
+                        ex.getMethods()
+                );
+
         return buildError(
                 HttpStatus.PRECONDITION_REQUIRED,
                 "RBAC_MFA_REQUIRED",
-                "Yêu cầu xác thực lại trước khi đăng xuất tất cả phiên."
+                "Vui lòng xác thực lại trước khi tiếp tục.",
+                details
         );
     }
 
@@ -217,6 +256,460 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 "AUTH_INVALID_INPUT",
                 "Mật khẩu mới chưa đáp ứng yêu cầu."
+        );
+    }
+
+    @ExceptionHandler(MfaAlreadyEnabledException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAlreadyEnabled(MfaAlreadyEnabledException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_MFA_ALREADY_ENABLED",
+                "2FA đã được bật."
+        );
+    }
+
+    @ExceptionHandler(MfaSetupForbiddenException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaSetupForbidden(MfaSetupForbiddenException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidMfaCodeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidMfaCode(InvalidMfaCodeException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_MFA_INVALID",
+                "Mã 2FA không đúng."
+        );
+    }
+
+    @ExceptionHandler(MfaChallengeExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaChallengeExpired(MfaChallengeExpiredException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_MFA_CHALLENGE_EXPIRED",
+                "Phiên xác thực 2FA đã hết hạn."
+        );
+    }
+
+    @ExceptionHandler(MfaAttemptsExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAttemptsExceeded(MfaAttemptsExceededException ex) {
+        return buildError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AUTH_MFA_ATTEMPTS_EXCEEDED",
+                "Bạn đã thử quá số lần cho phép."
+        );
+    }
+
+    @ExceptionHandler(InvalidMfaVerifyRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidMfaVerifyRequest(InvalidMfaVerifyRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(MfaAuthenticationRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleMfaAuthenticationRequired(MfaAuthenticationRequiredException ex) {
+        return buildError(
+                HttpStatus.UNAUTHORIZED,
+                "AUTH_TOKEN_INVALID",
+                "Phiên đăng nhập không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnreadableRequest(HttpMessageNotReadableException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "AUTH_USER_NOT_FOUND",
+                "Không tìm thấy tài khoản."
+        );
+    }
+
+    @ExceptionHandler(ProfileInvalidException.class)
+    public ResponseEntity<ApiErrorResponse> handleProfileInvalid(ProfileInvalidException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ProfilePhoneAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleProfilePhoneExists(ProfilePhoneAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_PHONE_EXISTS",
+                "Số điện thoại đã được sử dụng."
+        );
+    }
+
+    @ExceptionHandler(InvalidAddressQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAddressQuery(InvalidAddressQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidAddressInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAddressInput(InvalidAddressInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(AddressLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressLimitReached(AddressLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "ADDRESS_LIMIT_REACHED",
+                "Bạn đã đạt giới hạn số địa chỉ."
+        );
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressNotFound(AddressNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "ADDRESS_NOT_FOUND",
+                "Không tìm thấy địa chỉ."
+        );
+    }
+
+    @ExceptionHandler(AddressDefaultRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleAddressDefaultRequired(AddressDefaultRequiredException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "ADDRESS_DEFAULT_REQUIRED",
+                "Cần có một địa chỉ mặc định."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerRegistrationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerRegistration(InvalidSellerRegistrationException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(SellerEmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerEmailNotVerified(SellerEmailNotVerifiedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "AUTH_EMAIL_NOT_VERIFIED",
+                "Vui lòng xác thực email trước."
+        );
+    }
+
+    @ExceptionHandler(ShopAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopAlreadyExists(ShopAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_ALREADY_EXISTS",
+                "Tài khoản đã có hồ sơ người bán."
+        );
+    }
+
+    @ExceptionHandler(TaxCodeAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTaxCodeAlreadyExists(TaxCodeAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_TAX_CODE_EXISTS",
+                "Mã số thuế đã được sử dụng."
+        );
+    }
+
+    @ExceptionHandler(ShopSlugAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopSlugAlreadyExists(ShopSlugAlreadyExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_SLUG_EXISTS",
+                "Đường dẫn gian hàng đã tồn tại."
+        );
+    }
+
+    @ExceptionHandler(ShopNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopNotFound(
+            ShopNotFoundException ex
+    ) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "SHOP_NOT_FOUND",
+                "Không tìm thấy gian hàng."
+        );
+    }
+
+    @ExceptionHandler(SellerPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSellerPermissionDenied(
+            SellerPermissionDeniedException ex
+    ) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerProfile(InvalidSellerProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ShopInvalidStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopInvalidState(ShopInvalidStateException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_INVALID_STATE",
+                "Trạng thái gian hàng không cho phép thao tác."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerWarehouseException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerWarehouse(InvalidSellerWarehouseException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidKycDocumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidKycDocument(InvalidKycDocumentException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "KYC_DOCUMENT_INVALID",
+                "Tài liệu không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentTooLargeException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentTooLarge(KycDocumentTooLargeException ex) {
+        return buildError(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "KYC_DOCUMENT_TOO_LARGE",
+                "Tài liệu vượt quá dung lượng cho phép."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentLimitReached(KycDocumentLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DOCUMENT_LIMIT_REACHED",
+                "Hồ sơ đã đạt giới hạn số tài liệu."
+        );
+    }
+
+    @ExceptionHandler(KycAlreadyPendingException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycAlreadyPending(KycAlreadyPendingException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_ALREADY_PENDING",
+                "Hồ sơ đang được xét duyệt."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentNotFound(KycDocumentNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "KYC_DOCUMENT_NOT_FOUND",
+                "Không tìm thấy tài liệu."
+        );
+    }
+
+    @ExceptionHandler(KycDocumentAlreadyCompletedException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDocumentAlreadyCompleted(KycDocumentAlreadyCompletedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DOCUMENT_ALREADY_COMPLETED",
+                "Tài liệu đã được hoàn tất."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerBankException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerBank(InvalidSellerBankException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(BankAccountInvalidException.class)
+    public ResponseEntity<ApiErrorResponse> handleBankAccountInvalid(BankAccountInvalidException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "BANK_ACCOUNT_INVALID",
+                "Thông tin tài khoản ngân hàng chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidSellerShopProfileException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSellerShopProfile(InvalidSellerShopProfileException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "PROFILE_INVALID",
+                "Thông tin hồ sơ chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminKycQueueQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminKycQueueQuery(InvalidAdminKycQueueQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminKycPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminKycPermissionDenied(AdminKycPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(KycCaseNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycCaseNotFound(KycCaseNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "KYC_CASE_NOT_FOUND",
+                "Không tìm thấy hồ sơ KYC."
+        );
+    }
+
+    @ExceptionHandler(InvalidKycReviewRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidKycReviewRequest(InvalidKycReviewRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(KycDecisionConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleKycDecisionConflict(KycDecisionConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "KYC_DECISION_INVALID",
+                "Quyết định KYC chưa hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminRbacPermissionDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminRbacPermissionDenied(AdminRbacPermissionDeniedException ex) {
+        return buildError(
+                HttpStatus.FORBIDDEN,
+                "RBAC_PERMISSION_DENIED",
+                "Bạn không có quyền thực hiện thao tác này."
+        );
+    }
+
+    @ExceptionHandler(InvalidRoleAssignmentException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidRoleAssignment(InvalidRoleAssignmentException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "RBAC_INVALID_ROLE",
+                "Vai trò hoặc phạm vi không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentExists(RoleAssignmentExistsException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_EXISTS",
+                "Quyền này đã được cấp."
+        );
+    }
+
+    @ExceptionHandler(RoleAssignmentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleRoleAssignmentNotFound(RoleAssignmentNotFoundException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "RBAC_ASSIGNMENT_NOT_FOUND",
+                "Không tìm thấy quyền cần thu hồi."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminUserStatusRequestException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminUserStatusRequest(InvalidAdminUserStatusRequestException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu đầu vào không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(AdminUserStatusConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleAdminUserStatusConflict(AdminUserStatusConflictException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "AUTH_ACCOUNT_SUSPENDED",
+                "Trạng thái tài khoản hiện tại không cho phép thao tác."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdminAuditQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdminAuditQuery(InvalidAdminAuditQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Dữ liệu truy vấn không hợp lệ."
+        );
+    }
+
+    @ExceptionHandler(InvalidFavoriteQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFavoriteQuery(InvalidFavoriteQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(InvalidFavoriteInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFavoriteInput(InvalidFavoriteInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(FavoriteLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleFavoriteLimitReached(FavoriteLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "FAVORITE_LIMIT_REACHED",
+                "Bạn đã đạt giới hạn số sản phẩm yêu thích."
         );
     }
 

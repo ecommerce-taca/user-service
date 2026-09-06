@@ -105,7 +105,8 @@ public class AuditLog {
             );
         }
 
-        if (reason != null && reason.length() > 1000) {
+        if (reason != null
+                && reason.codePointCount(0, reason.length()) > 1000) {
             throw new IllegalArgumentException(
                     "Audit reason is too long"
             );

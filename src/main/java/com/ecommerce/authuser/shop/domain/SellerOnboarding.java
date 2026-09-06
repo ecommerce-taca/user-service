@@ -27,6 +27,8 @@ import java.util.UUID;
 @Getter
 public class SellerOnboarding {
 
+    private static final String KYC_DOCUMENT_REQUIRED = "KYC_DOCUMENT_REQUIRED";
+
     @Id
     @Column(
             name = "id",
@@ -94,6 +96,95 @@ public class SellerOnboarding {
         onboarding.blockers = new ArrayList<>();
 
         return onboarding;
+    }
+
+    public void completeProfileStep() {
+        profileCompleted = true;
+
+        if (currentStep == OnboardingStep.PROFILE) {
+
+            currentStep = OnboardingStep.KYC;
+
+            replaceBlockers(List.of(KYC_DOCUMENT_REQUIRED));
+        }
+    }
+
+    public void completeWarehouseStep() {
+        warehouseCompleted = true;
+
+        if (currentStep == OnboardingStep.WAREHOUSE) {
+            if (!bankCompleted) {
+                currentStep = OnboardingStep.BANK;
+                return;
+            }
+
+            if (!firstProductCompleted) {
+                currentStep = OnboardingStep.FIRST_PRODUCT;
+                return;
+            }
+
+            currentStep = OnboardingStep.COMPLETED;
+        }
+    }
+
+    public void completeBankStep() {
+
+        bankCompleted = true;
+
+        if (currentStep == OnboardingStep.BANK) {
+
+            if (!firstProductCompleted) {
+                currentStep = OnboardingStep.FIRST_PRODUCT;
+                return;
+            }
+
+            currentStep = OnboardingStep.COMPLETED;
+        }
+    }
+
+    public void completeKycSubmissionStep() {
+        kycCompleted = true;
+
+        removeBlocker(KYC_DOCUMENT_REQUIRED);
+
+        if (currentStep == OnboardingStep.KYC) {
+            currentStep = resolveNextStepAfterKyc();
+        }
+    }
+
+    public void reopenKycStep() {
+
+        kycCompleted = false;
+
+        currentStep = OnboardingStep.KYC;
+
+        addBlockerIfAbsent(KYC_DOCUMENT_REQUIRED);
+    }
+
+    private void addBlockerIfAbsent(String blocker) {
+        if (!blockers.contains(blocker)) {
+            blockers.add(blocker);
+        }
+    }
+
+    private void removeBlocker(String blocker) {
+        blockers.removeIf(blocker::equals);
+    }
+
+    private OnboardingStep resolveNextStepAfterKyc() {
+        if (!warehouseCompleted) {
+            return OnboardingStep.WAREHOUSE;
+        }
+
+        if (!bankCompleted) {
+            return OnboardingStep.BANK;
+        }
+
+        if (!firstProductCompleted) {
+            return OnboardingStep.FIRST_PRODUCT;
+        }
+
+        return OnboardingStep.COMPLETED;
     }
 
     @PrePersist

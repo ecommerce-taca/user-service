@@ -272,4 +272,77 @@ public class User {
         this.passwordHash = newPasswordHash;
         this.passwordChangedAt = now;
     }
+
+    public void updateProfile(
+            String fullName,
+            boolean updatePhone,
+            String phone,
+            String phoneNormalized,
+            boolean updateDateOfBirth,
+            LocalDate dateOfBirth
+    ) {
+        Objects.requireNonNull(fullName);
+
+        if (fullName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Full name must not be blank"
+            );
+        }
+
+        if (updatePhone) {
+            boolean phoneNullMismatch =
+                    (phone == null) != (phoneNormalized == null);
+
+            if (phoneNullMismatch) {
+                throw new IllegalArgumentException(
+                        "Phone and normalized phone must be both null or both non-null"
+                );
+            }
+        }
+
+        this.fullName = fullName;
+
+        if (updatePhone
+                && !Objects.equals(
+                this.phoneNormalized,
+                phoneNormalized
+        )) {
+
+            this.phone = phone;
+            this.phoneNormalized = phoneNormalized;
+            this.phoneVerifiedAt = null;
+        }
+
+        if (updateDateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+        }
+    }
+
+    public void suspend() {
+        if (status != UserStatus.ACTIVE && status != UserStatus.LOCKED) {
+            throw new IllegalStateException(
+                    "User cannot be suspended"
+            );
+        }
+
+        status = UserStatus.SUSPENDED;
+
+        lockedUntil = null;
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
+    }
+
+    public void restore() {
+        if (status != UserStatus.SUSPENDED) {
+            throw new IllegalStateException(
+                    "User cannot be restored"
+            );
+        }
+
+        status = UserStatus.ACTIVE;
+
+        lockedUntil = null;
+        failedLoginCount = 0;
+        failedLoginWindowStartedAt = null;
+    }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.LockModeType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,5 +31,14 @@ public interface TwoFactorRecoveryCodeRepository extends JpaRepository<TwoFactor
     Optional<TwoFactorRecoveryCode> findUsableCodeForUpdate(
             @Param("credentialId") UUID credentialId,
             @Param("codeHash") String codeHash
+    );
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+        delete from TwoFactorRecoveryCode code
+        where code.credential.id = :credentialId
+    """)
+    int deleteAllByCredentialId(
+            @Param("credentialId") UUID credentialId
     );
 }
