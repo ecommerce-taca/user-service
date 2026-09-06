@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/userdb_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&tinyInt1isBit=false
+    username: ecommerce
+    password: ecommerce
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+auth:
+  audit:
+    hash-key-base64: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+  
+  outbox:
+    encryption-key-base64: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
+  otp:
+    hash-key-base64: "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+
+  mfa:
+    encryption-key-base64: "FjCTJSr7RYZufOFSFng8eSQkKURuio1qVtOtKAe7tvc="
+
+  jwt:
+    key-id: "test-rsa-key"
+    private-key-base64: "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCmTqf6M7U3+AGEqqL6GHtVynoxlXYnOkEHqX76o5hqheguH1WTiNJVq8yevHiBtJVnrLACQ7gXN9VUAXHsIC3tTEGHQMA39UDj4/OVHrlXTCCXPRqXFsc4QM5ZEcE2S4Exo5Oz6q93yJBH+KHalNZlpViRBB2Y/jR83HBZiDZXj+0dVUctggzHEZzORgLHAqfuhdPoow8QKfZuhaAjmN9LSC5WepN0FitZTzoNYpBLShwYWq9KvNcihcCK6aGgLL9GilfnHYIzw1Y4Id1gSN2NRyU/8LiX1uQ9hRv14tlTmUGfHfZrmQ+zdeBsNI1YKHeKxqFpGBR65T8TN4SwbwGNAgMBAAECggEAB1luKpboDmn10IyP443QaX6nVBNJo5B7TjY10n1cn3HSdwiodKV1EhcjquzORdZv9yMWViCdp90DnuY/cr1gpN4b/o5PJZ8/d7Kw/Cky7JeEey/WlyWztm8wD0HtxWikdB1JSjKiqsr2C/rXVZGtQH8EQR2q8ddjWhSNxyRyA6raLiOTe4g82+XY9wlg/JfDoBMZ/jjPsEblNUdO+m3tyq5eXMYanc5kT9u7n0BiK1ph0wZfHBVuhLXFyU9EQfVk7KyZYuIMG8kxlP+WR7tAmYEieT5nvTx30ytO5qwbgSqSM7iVJWlCZ6YG3ARB/jaV+4nSwnjXCRee/Il0hnTR+wKBgQDIS2d5c1AO8qEoUO+5WK52JSQR9CM65/SRGvlFPEzdnpP1hBRai09PVUxaK6FrVgN939zIdiw5bUnvdCrAqmg8Ob9hiWIGFL6/8H11c5bmKHAUyVWm7oly34TBOShlNeWgZWxSJrWKcDrHu5l3bQi9ocAxivZBx6r/P0qX8lvP7wKBgQDUj2uTYOn2Cg+HowkeMdiaKciU8wdXuMg7bXXo/Qy6L0Z6g7fRhvgzmv8p7UZFUYJTjUIA9E8X4jMnkuc5XL8WCn4Vt7jVdOxz6FcF4je/ul5pA5pRtD6wyqOUgOpJsVrhYytL6Apiqj5s2cHJOcHKqheLSZvc/TaPMMW/H/vKQwKBgG3XDDPKTQklfcOCPzTBsUsRKyq9W+Sd97zrse+KFg0jPbjSaecNpry25lw8uRUH4npRHd7BD5eem4E5j4iA6xC8CnwOvzbegYz48ZRLg2FMo8qCbvpQrgfVFBRyp/h5Cihf9ntGxx/YVCPceVjI7pYv8ho5PrrsKJY5u0qAmmD5AoGBAMow8t9qHKMRxtv61b2HJMbgYBBvbNigyLbe1H4f129zcNMxYDVK8eYE1huHvIRLmHDpuZM20dWiMY6/SntiIdJRgMYf0Q4a/qDyrXTHTsht+0hhSPXXQprg5uFoD3Sx5ATpVFIME3TvBBp+uLs02YZybZrtFfoMU0250yCOx/AJAoGAC9BVzHtmUTJmJxsOuO/ldnfFdwcAXY0edAFN0MQ+klqohk7PSWDIMHuTm4+Ffq0v15yWTbCQtUS2AEFH2WJIq9GIatBnmMXEYFEyteM8uEN1JNNL18vqmOOSbotzrn4xZpqWe4TPGZIVZsXWTNZMI7rP9xAGslX4lcBQQgV7J/s="
+    public-key-base64: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApk6n+jO1N/gBhKqi+hh7Vcp6MZV2JzpBB6l++qOYaoXoLh9Vk4jSVavMnrx4gbSVZ6ywAkO4FzfVVAFx7CAt7UxBh0DAN/VA4+PzlR65V0wglz0alxbHOEDOWRHBNkuBMaOTs+qvd8iQR/ih2pTWZaVYkQQdmP40fNxwWYg2V4/tHVVHLYIMxxGczkYCxwKn7oXT6KMPECn2boWgI5jfS0guVnqTdBYrWU86DWKQS0ocGFqvSrzXIoXAiumhoCy/RopX5x2CM8NWOCHdYEjdjUclP/C4l9bkPYUb9eLZU5lBnx32a5kPs3XgbDSNWCh3isahaRgUeuU/EzeEsG8BjQIDAQAB"
+
+server:
+  port: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
