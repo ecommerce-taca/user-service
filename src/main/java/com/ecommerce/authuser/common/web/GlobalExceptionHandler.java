@@ -19,6 +19,7 @@ import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
 import com.ecommerce.authuser.shop.exception.*;
 import com.ecommerce.authuser.shopfollow.exception.InvalidShopFollowInputException;
+import com.ecommerce.authuser.shopfollow.exception.InvalidShopFollowQueryException;
 import com.ecommerce.authuser.shopfollow.exception.ShopFollowLimitReachedException;
 import com.ecommerce.authuser.user.exception.admin.AdminUserStatusConflictException;
 import com.ecommerce.authuser.user.exception.admin.InvalidAdminUserStatusRequestException;
@@ -730,6 +731,15 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "SHOP_FOLLOW_LIMIT_REACHED",
                 "Bạn đã đạt giới hạn số shop có thể theo dõi."
+        );
+    }
+
+    @ExceptionHandler(InvalidShopFollowQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidShopFollowQuery(InvalidShopFollowQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin truy vấn chưa đúng."
         );
     }
 
