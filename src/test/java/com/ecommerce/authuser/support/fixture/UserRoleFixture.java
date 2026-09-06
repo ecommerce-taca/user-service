@@ -6,9 +6,11 @@ import com.ecommerce.authuser.rbac.repository.UserRoleRepository;
 import com.ecommerce.authuser.shop.domain.Shop;
 import com.ecommerce.authuser.support.builder.UserRoleTestBuilder;
 import com.ecommerce.authuser.user.domain.User;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
 public final class UserRoleFixture {
 
     private final UserRoleRepository userRoleRepository;

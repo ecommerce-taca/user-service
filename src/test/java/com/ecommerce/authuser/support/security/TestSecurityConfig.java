@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.context.annotation.Primary;
 
 import java.security.interfaces.RSAPublicKey;
 
@@ -15,6 +16,7 @@ import java.security.interfaces.RSAPublicKey;
 public class TestSecurityConfig {
 
     @Bean
+    @Primary
     JwtDecoder testJwtDecoder() {
         RSAPublicKey publicKey =
                 (RSAPublicKey) TestJwtFactory

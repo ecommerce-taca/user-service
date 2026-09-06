@@ -46,10 +46,9 @@ public final class UserTestBuilder {
                 .withFullName("Test Buyer");
     }
 
-    public UserTestBuilder withEmail(
-            String email
-    ) {
+    public UserTestBuilder withEmail(String email) {
         this.email = email;
+        this.emailNormalized = email;
         return this;
     }
 
