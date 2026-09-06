@@ -18,6 +18,8 @@ import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentNotFoundException;
 import com.ecommerce.authuser.shop.exception.*;
+import com.ecommerce.authuser.shopfollow.exception.InvalidShopFollowInputException;
+import com.ecommerce.authuser.shopfollow.exception.ShopFollowLimitReachedException;
 import com.ecommerce.authuser.user.exception.admin.AdminUserStatusConflictException;
 import com.ecommerce.authuser.user.exception.admin.InvalidAdminUserStatusRequestException;
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
@@ -710,6 +712,24 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "FAVORITE_LIMIT_REACHED",
                 "Bạn đã đạt giới hạn số sản phẩm yêu thích."
+        );
+    }
+
+    @ExceptionHandler(InvalidShopFollowInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidShopFollowInput(InvalidShopFollowInputException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin gửi lên chưa đúng."
+        );
+    }
+
+    @ExceptionHandler(ShopFollowLimitReachedException.class)
+    public ResponseEntity<ApiErrorResponse> handleShopFollowLimitReached(ShopFollowLimitReachedException ex) {
+        return buildError(
+                HttpStatus.CONFLICT,
+                "SHOP_FOLLOW_LIMIT_REACHED",
+                "Bạn đã đạt giới hạn số shop có thể theo dõi."
         );
     }
 
