@@ -8,13 +8,16 @@ import com.ecommerce.authuser.rbac.repository.UserRoleRepository;
 import com.ecommerce.authuser.token.repository.RefreshTokenRepository;
 import com.ecommerce.authuser.token.repository.VerificationTokenRepository;
 import com.ecommerce.authuser.user.repository.UserRepository;
+import com.ecommerce.authuser.support.security.TestSecurityConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Import;
 
+@Import(TestSecurityConfig.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

@@ -10,13 +10,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.ecommerce.authuser.support.base.BaseIntegrationTest;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class SignoutIntegrationTest {
+class SignoutIntegrationTest extends BaseIntegrationTest {
 private static final String SIGNUP_URL =
         "/api/v1/auth/signup";
 
