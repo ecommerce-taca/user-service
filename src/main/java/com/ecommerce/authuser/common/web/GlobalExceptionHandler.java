@@ -743,6 +743,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidPublicShopQueryException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPublicShopQuery(InvalidPublicShopQueryException ex) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "AUTH_INVALID_INPUT",
+                "Thông tin shop chưa đúng."
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> buildError(
             HttpStatus status,
             String code,

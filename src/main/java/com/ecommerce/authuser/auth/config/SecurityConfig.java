@@ -32,6 +32,7 @@ public class SecurityConfig {
 
                                 .requestMatchers(
                                         HttpMethod.GET,
+                                        "/api/v1/shops/*",
                                         "/api/v1/shops/*/followers/count"
                                 )
                                 .permitAll()
