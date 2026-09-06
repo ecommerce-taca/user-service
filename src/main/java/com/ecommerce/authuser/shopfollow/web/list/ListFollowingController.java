@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shopfollow.web.list;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.port.ShopAssetUrlPort;
 
 import com.ecommerce.authuser.shopfollow.application.list.FollowingShopResult;
@@ -70,7 +71,7 @@ public class ListFollowingController {
                                 result.size(),
                                 result.total(),
                                 result.totalPages(),
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -110,19 +111,5 @@ public class ListFollowingController {
         } catch (NumberFormatException ex) {
             throw new InvalidShopFollowQueryException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

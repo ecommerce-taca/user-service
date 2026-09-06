@@ -2,6 +2,7 @@ package com.ecommerce.authuser.favorite.web.add;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.favorite.application.add.AddFavoriteCommand;
 import com.ecommerce.authuser.favorite.application.add.AddFavoriteResult;
 import com.ecommerce.authuser.favorite.application.add.AddFavoriteService;
@@ -63,9 +64,7 @@ public class AddFavoriteController {
                         ),
 
                         new AddFavoriteResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -96,18 +95,5 @@ public class AddFavoriteController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidFavoriteInputException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

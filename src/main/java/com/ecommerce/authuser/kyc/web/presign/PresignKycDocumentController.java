@@ -2,6 +2,7 @@ package com.ecommerce.authuser.kyc.web.presign;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.kyc.application.presign.PresignKycDocumentCommand;
 import com.ecommerce.authuser.kyc.application.presign.PresignKycDocumentResult;
 import com.ecommerce.authuser.kyc.application.presign.PresignKycDocumentService;
@@ -70,30 +71,12 @@ public class PresignKycDocumentController {
                         ),
 
                         new PresignKycDocumentResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
-    }
-
-    private String resolveRequestId(
-            String requestId
-    ) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

@@ -2,6 +2,7 @@ package com.ecommerce.authuser.kyc.web.admin.detail;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.kyc.application.admin.detail.AdminKycDetailQuery;
 import com.ecommerce.authuser.kyc.application.admin.detail.AdminKycDetailResult;
 import com.ecommerce.authuser.kyc.application.admin.detail.AdminKycDetailService;
@@ -117,7 +118,7 @@ public class AdminKycDetailController {
                 ),
 
                 new AdminKycDetailResponse.Meta(
-                        resolveRequestId(requestId)
+                        RequestIdResolver.resolve(requestId)
                 )
         );
     }
@@ -136,18 +137,5 @@ public class AdminKycDetailController {
                 document.downloadUrl(),
                 document.downloadExpiresAt()
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

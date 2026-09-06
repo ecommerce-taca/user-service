@@ -4,6 +4,7 @@ import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredExcept
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.user.application.admin.status.AdminUserStatusCommand;
 import com.ecommerce.authuser.user.application.admin.status.AdminUserStatusResult;
 import com.ecommerce.authuser.user.application.admin.status.AdminUserStatusService;
@@ -75,9 +76,7 @@ public class AdminUserStatusController {
                         ),
 
                         new AdminUserStatusResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 )
         );
@@ -125,17 +124,5 @@ public class AdminUserStatusController {
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

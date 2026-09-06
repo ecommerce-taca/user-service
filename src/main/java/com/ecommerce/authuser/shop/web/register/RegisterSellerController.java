@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.register;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.register.RegisterSellerCommand;
 import com.ecommerce.authuser.shop.application.register.RegisterSellerResult;
 import com.ecommerce.authuser.shop.application.register.RegisterSellerService;
@@ -72,25 +73,12 @@ public class RegisterSellerController {
                                 )
                         ),
                         new RegisterSellerResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

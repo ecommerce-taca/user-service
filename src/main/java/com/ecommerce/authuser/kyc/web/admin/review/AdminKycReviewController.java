@@ -4,6 +4,7 @@ import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredExcept
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.kyc.application.admin.review.AdminKycReviewCommand;
 import com.ecommerce.authuser.kyc.application.admin.review.AdminKycReviewResult;
 import com.ecommerce.authuser.kyc.application.admin.review.AdminKycReviewService;
@@ -75,9 +76,7 @@ public class AdminKycReviewController {
                         ),
 
                         new AdminKycReviewResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 )
         );
@@ -125,17 +124,5 @@ public class AdminKycReviewController {
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

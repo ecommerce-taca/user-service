@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shopfollow.web.follow;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shopfollow.application.follow.FollowShopCommand;
 import com.ecommerce.authuser.shopfollow.application.follow.FollowShopResult;
 import com.ecommerce.authuser.shopfollow.application.follow.FollowShopService;
@@ -57,9 +58,7 @@ public class FollowShopController {
                                 result.followedAt()
                         ),
                         new FollowShopResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -96,18 +95,5 @@ public class FollowShopController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidShopFollowInputException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }
