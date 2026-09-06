@@ -1,7 +1,7 @@
 package com.ecommerce.authuser.shop.application.onboarding.warehouse;
 
-import com.ecommerce.authuser.auth.application.IdentityNormalizer;
-import com.ecommerce.authuser.auth.exception.InvalidPhoneFormatException;
+import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
 
 import com.ecommerce.authuser.rbac.domain.RbacKeys;
 import com.ecommerce.authuser.rbac.repository.UserRoleRepository;

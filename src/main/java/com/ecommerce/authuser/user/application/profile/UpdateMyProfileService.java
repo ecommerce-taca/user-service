@@ -1,7 +1,7 @@
 package com.ecommerce.authuser.user.application.profile;
 
-import com.ecommerce.authuser.auth.application.IdentityNormalizer;
-import com.ecommerce.authuser.auth.exception.InvalidPhoneFormatException;
+import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
 
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;

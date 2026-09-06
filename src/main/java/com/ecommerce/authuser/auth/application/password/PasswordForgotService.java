@@ -1,7 +1,7 @@
 package com.ecommerce.authuser.auth.application.password;
 
-import com.ecommerce.authuser.auth.application.IdentityNormalizer;
-import com.ecommerce.authuser.auth.exception.InvalidPhoneFormatException;
+import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;

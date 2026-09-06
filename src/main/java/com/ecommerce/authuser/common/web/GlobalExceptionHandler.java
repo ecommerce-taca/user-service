@@ -2,11 +2,26 @@ package com.ecommerce.authuser.common.web;
 
 import com.ecommerce.authuser.address.exception.*;
 import com.ecommerce.authuser.audit.exception.InvalidAdminAuditQueryException;
-import com.ecommerce.authuser.auth.exception.*;
 import com.ecommerce.authuser.auth.exception.mfa.*;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInputException;
 import com.ecommerce.authuser.auth.exception.password.InvalidPasswordResetTokenException;
+import com.ecommerce.authuser.auth.exception.session.ExpiredRefreshTokenException;
+import com.ecommerce.authuser.auth.exception.session.InvalidRefreshTokenException;
+import com.ecommerce.authuser.auth.exception.session.ReusedRefreshTokenException;
+import com.ecommerce.authuser.auth.exception.signin.AccountLockedException;
+import com.ecommerce.authuser.auth.exception.signin.AccountSuspendedException;
+import com.ecommerce.authuser.auth.exception.signin.AdminMfaRequiredException;
+import com.ecommerce.authuser.auth.exception.signin.InvalidCredentialsException;
+import com.ecommerce.authuser.auth.exception.signup.EmailAlreadyExistsException;
+import com.ecommerce.authuser.auth.exception.signup.PhoneAlreadyExistsException;
+import com.ecommerce.authuser.auth.exception.verification.email.InvalidVerificationTokenException;
+import com.ecommerce.authuser.auth.exception.verification.email.ResendLimitExceededException;
+import com.ecommerce.authuser.auth.exception.verification.email.VerificationAlreadyCompleteException;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidOtpException;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
+import com.ecommerce.authuser.auth.exception.verification.phone.OtpAttemptsExceededException;
+import com.ecommerce.authuser.auth.exception.verification.phone.OtpRateLimitedException;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import com.ecommerce.authuser.favorite.exception.FavoriteLimitReachedException;

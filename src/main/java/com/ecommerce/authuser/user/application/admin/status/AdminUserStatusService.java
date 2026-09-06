@@ -4,7 +4,7 @@ import com.ecommerce.authuser.audit.domain.AuditLog;
 import com.ecommerce.authuser.audit.domain.AuditTargetType;
 import com.ecommerce.authuser.audit.repository.AuditLogRepository;
 
-import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
+import com.ecommerce.authuser.auth.exception.mfa.MfaStepUpRequiredException;
 
 import com.ecommerce.authuser.mfa.application.admin.AdminStepUpService;
 
@@ -41,7 +41,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

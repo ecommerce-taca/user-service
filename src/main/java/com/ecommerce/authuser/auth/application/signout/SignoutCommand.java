@@ -1,0 +1,13 @@
+package com.ecommerce.authuser.auth.application.signout;
+
+import java.util.UUID;
+
+public record SignoutCommand(
+        UUID userId,
+        UUID sessionId,
+        String refreshToken,
+        boolean allSessions,
+        String stepUpToken,
+        String clientIp
+) {
+}

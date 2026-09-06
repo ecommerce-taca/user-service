@@ -4,7 +4,7 @@ import com.ecommerce.authuser.audit.domain.AuditLog;
 import com.ecommerce.authuser.audit.domain.AuditTargetType;
 import com.ecommerce.authuser.audit.repository.AuditLogRepository;
 
-import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
+import com.ecommerce.authuser.auth.exception.mfa.MfaStepUpRequiredException;
 
 import com.ecommerce.authuser.kyc.application.admin.AdminKycAuthorizationService;
 

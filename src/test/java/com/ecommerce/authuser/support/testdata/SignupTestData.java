@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.support.testdata;
 
-import com.ecommerce.authuser.auth.web.SignupRequest;
+import com.ecommerce.authuser.auth.web.signup.SignupRequest;
 
 public final class SignupTestData {
 

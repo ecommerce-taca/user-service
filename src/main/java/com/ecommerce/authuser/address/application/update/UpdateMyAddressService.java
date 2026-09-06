@@ -6,8 +6,8 @@ import com.ecommerce.authuser.address.exception.AddressNotFoundException;
 import com.ecommerce.authuser.address.exception.InvalidAddressInputException;
 import com.ecommerce.authuser.address.repository.AddressRepository;
 
-import com.ecommerce.authuser.auth.application.IdentityNormalizer;
-import com.ecommerce.authuser.auth.exception.InvalidPhoneFormatException;
+import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
 
 import com.ecommerce.authuser.user.domain.User;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;

@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.kyc.application.admin.review;
 
-import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
+import com.ecommerce.authuser.auth.exception.mfa.MfaStepUpRequiredException;
 import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredException;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 
