@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.publicprofile;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.publicprofile.GetPublicShopQuery;
 import com.ecommerce.authuser.shop.application.publicprofile.GetPublicShopResult;
 import com.ecommerce.authuser.shop.application.publicprofile.GetPublicShopService;
@@ -65,9 +66,7 @@ public class GetPublicShopController {
                                 result.createdAt()
                         ),
                         new GetPublicShopResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -98,19 +97,5 @@ public class GetPublicShopController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidPublicShopQueryException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

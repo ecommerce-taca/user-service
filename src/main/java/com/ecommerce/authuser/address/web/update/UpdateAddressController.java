@@ -8,6 +8,7 @@ import com.ecommerce.authuser.address.exception.InvalidAddressInputException;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -81,7 +82,8 @@ public class UpdateAddressController {
                                 result.updatedAt()
                         ),
 
-                        new UpdateMyAddressResponse.Meta(resolveRequestId(requestId)
+                        new UpdateMyAddressResponse.Meta(
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -96,18 +98,5 @@ public class UpdateAddressController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidAddressInputException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

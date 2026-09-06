@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shopfollow.web.count;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shopfollow.application.count.GetFollowerCountQuery;
 import com.ecommerce.authuser.shopfollow.application.count.GetFollowerCountResult;
 import com.ecommerce.authuser.shopfollow.application.count.GetFollowerCountService;
@@ -48,7 +49,7 @@ public class GetFollowerCountController {
                                 result.followerCount()
                         ),
                         new GetFollowerCountResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -78,18 +79,5 @@ public class GetFollowerCountController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidShopFollowQueryException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

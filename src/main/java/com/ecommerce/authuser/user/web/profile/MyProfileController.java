@@ -2,6 +2,7 @@ package com.ecommerce.authuser.user.web.profile;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.user.application.profile.*;
 
 import com.ecommerce.authuser.user.exception.profile.ProfileInvalidException;
@@ -55,9 +56,7 @@ public class MyProfileController {
                         ),
 
                         new MyProfileResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -117,26 +116,11 @@ public class MyProfileController {
                         ),
 
                         new UpdateMyProfileResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity.ok(response);
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 
     private LocalDate parseDateOfBirth(UpdateMyProfileRequest request) {

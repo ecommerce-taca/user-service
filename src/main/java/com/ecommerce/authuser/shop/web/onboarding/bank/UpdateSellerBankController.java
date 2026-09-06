@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.onboarding.bank;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.onboarding.bank.UpdateSellerBankCommand;
 import com.ecommerce.authuser.shop.application.onboarding.bank.UpdateSellerBankResult;
 import com.ecommerce.authuser.shop.application.onboarding.bank.UpdateSellerBankService;
@@ -63,9 +64,7 @@ public class UpdateSellerBankController {
                                 result.verified()
                         ),
                         new UpdateSellerBankResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -80,18 +79,5 @@ public class UpdateSellerBankController {
         } catch (IllegalArgumentException | NullPointerException ex) {
             throw new InvalidSellerBankException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

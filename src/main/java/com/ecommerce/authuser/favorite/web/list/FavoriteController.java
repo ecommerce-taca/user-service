@@ -2,6 +2,7 @@ package com.ecommerce.authuser.favorite.web.list;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.favorite.application.list.FavoriteResult;
 import com.ecommerce.authuser.favorite.application.list.ListMyFavoritesQuery;
 import com.ecommerce.authuser.favorite.application.list.ListMyFavoritesResult;
@@ -67,9 +68,7 @@ public class FavoriteController {
                                 result.size(),
                                 result.total(),
                                 result.totalPages(),
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -102,18 +101,5 @@ public class FavoriteController {
                 favorite.productId(),
                 favorite.createdAt()
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

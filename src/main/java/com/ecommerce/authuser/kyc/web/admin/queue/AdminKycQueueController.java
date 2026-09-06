@@ -2,6 +2,7 @@ package com.ecommerce.authuser.kyc.web.admin.queue;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.kyc.application.admin.AdminKycAuthorizationService;
 import com.ecommerce.authuser.kyc.application.admin.queue.AdminKycQueueItem;
 import com.ecommerce.authuser.kyc.application.admin.queue.AdminKycQueueQuery;
@@ -91,9 +92,7 @@ public class AdminKycQueueController {
                                 result.size(),
                                 result.total(),
                                 result.totalPages(),
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -270,22 +269,6 @@ public class AdminKycQueueController {
                 item.documentCount(),
                 item.ageHours()
         );
-    }
-
-    private String resolveRequestId(
-            String requestId
-    ) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 
     private record ParsedSort(

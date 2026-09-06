@@ -6,8 +6,8 @@ import com.ecommerce.authuser.address.application.list.ListMyAddressesResult;
 import com.ecommerce.authuser.address.application.list.ListMyAddressesService;
 import com.ecommerce.authuser.address.exception.InvalidAddressQueryException;
 
-import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -67,9 +67,7 @@ public class AddressController {
                                 result.size(),
                                 result.total(),
                                 result.totalPages(),
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -109,17 +107,5 @@ public class AddressController {
                 address.createdAt(),
                 address.updatedAt()
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

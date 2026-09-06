@@ -4,6 +4,7 @@ import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredExcept
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.rbac.application.admin.roles.assignment.AdminRoleAssignmentCommand;
 import com.ecommerce.authuser.rbac.application.admin.roles.assignment.AdminRoleAssignmentResult;
 import com.ecommerce.authuser.rbac.application.admin.roles.assignment.AdminRoleAssignmentService;
@@ -86,9 +87,7 @@ public class AdminRoleAssignmentController {
                         ),
 
                         new AdminRoleAssignmentResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 )
         );
@@ -148,18 +147,5 @@ public class AdminRoleAssignmentController {
         } catch (IllegalArgumentException ex) {
             return INVALID_UUID_SENTINEL;
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

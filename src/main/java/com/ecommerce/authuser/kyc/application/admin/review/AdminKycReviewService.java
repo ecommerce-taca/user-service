@@ -24,6 +24,8 @@ import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
 
+import com.ecommerce.authuser.mfa.application.admin.AdminStepUpService;
+
 import com.ecommerce.authuser.security.service.AuditValueHasher;
 
 import com.ecommerce.authuser.shop.domain.KycStatus;
@@ -55,8 +57,6 @@ public class AdminKycReviewService {
 
     private final AdminKycAuthorizationService authorizationService;
 
-    private final AdminKycStepUpService stepUpService;
-
     private final ShopRepository shopRepository;
 
     private final SellerOnboardingRepository sellerOnboardingRepository;
@@ -70,6 +70,8 @@ public class AdminKycReviewService {
     private final OutboxEventRepository outboxEventRepository;
 
     private final AuditValueHasher auditValueHasher;
+
+    private final AdminStepUpService stepUpService;
 
     @Transactional(
             noRollbackFor = MfaStepUpRequiredException.class

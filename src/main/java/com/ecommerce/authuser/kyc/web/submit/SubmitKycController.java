@@ -2,6 +2,7 @@ package com.ecommerce.authuser.kyc.web.submit;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.kyc.application.submit.SubmitKycCommand;
 import com.ecommerce.authuser.kyc.application.submit.SubmitKycResult;
 import com.ecommerce.authuser.kyc.application.submit.SubmitKycService;
@@ -60,9 +61,7 @@ public class SubmitKycController {
                         ),
 
                         new SubmitKycResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -89,18 +88,5 @@ public class SubmitKycController {
         } catch (IllegalArgumentException | NullPointerException ex) {
             throw new InvalidKycDocumentException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

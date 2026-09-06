@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.onboarding.get;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.onboarding.get.GetSellerOnboardingQuery;
 import com.ecommerce.authuser.shop.application.onboarding.get.GetSellerOnboardingResult;
 import com.ecommerce.authuser.shop.application.onboarding.get.GetSellerOnboardingService;
@@ -65,23 +66,10 @@ public class GetSellerOnboardingController {
                                 result.blockers()
                         ),
                         new GetSellerOnboardingResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity.ok(response);
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

@@ -2,6 +2,7 @@ package com.ecommerce.authuser.favorite.web.contains;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.favorite.application.contains.ContainsFavoritesQuery;
 import com.ecommerce.authuser.favorite.application.contains.ContainsFavoritesResult;
 import com.ecommerce.authuser.favorite.application.contains.ContainsFavoritesService;
@@ -75,9 +76,7 @@ public class ContainsFavoritesController {
                                 )
                         ),
                         new ContainsFavoritesResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -131,18 +130,5 @@ public class ContainsFavoritesController {
         } catch (IllegalArgumentException ex) {
             throw new InvalidFavoriteQueryException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

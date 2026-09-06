@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.profile;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.profile.read.GetSellerShopResult;
 import com.ecommerce.authuser.shop.application.profile.read.GetSellerShopService;
 
@@ -55,7 +56,7 @@ public class GetSellerShopController {
                                 result.updatedAt()
                         ),
                         new GetSellerShopResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -101,18 +102,5 @@ public class GetSellerShopController {
         } catch (IllegalArgumentException | NullPointerException ex) {
             throw new SellerPermissionDeniedException();
         }
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

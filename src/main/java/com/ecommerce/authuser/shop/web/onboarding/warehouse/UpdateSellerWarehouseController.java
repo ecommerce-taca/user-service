@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.onboarding.warehouse;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.onboarding.warehouse.UpdateSellerWarehouseCommand;
 import com.ecommerce.authuser.shop.application.onboarding.warehouse.UpdateSellerWarehouseResult;
 import com.ecommerce.authuser.shop.application.onboarding.warehouse.UpdateSellerWarehouseService;
@@ -97,28 +98,12 @@ public class UpdateSellerWarehouseController {
                         ),
 
                         new UpdateSellerWarehouseResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity.ok(
                 response
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

@@ -36,6 +36,7 @@ import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpVerifyRequest;
 import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpVerifyResponse;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.mfa.domain.MfaMethod;
 import com.ecommerce.authuser.mfa.domain.MfaPurpose;
 import jakarta.servlet.http.HttpServletRequest;
@@ -100,7 +101,7 @@ public class AuthController {
                 )
         );
 
-        String resolvedRequestId = resolveRequestId(requestId);
+        String resolvedRequestId = RequestIdResolver.resolve(requestId);
 
         SignupResponse response = new SignupResponse(
                 new SignupResponse.Data(
@@ -154,8 +155,7 @@ public class AuthController {
                 )
         );
 
-        String resolvedRequestId =
-                resolveRequestId(requestId);
+        String resolvedRequestId = RequestIdResolver.resolve(requestId);
 
         SigninResponse response = new SigninResponse(
                 new SigninResponse.Data(
@@ -211,7 +211,7 @@ public class AuthController {
                         )
                 ),
 
-                new RefreshResponse.Meta(resolveRequestId(requestId)));
+                new RefreshResponse.Meta(RequestIdResolver.resolve(requestId)));
 
         return ResponseEntity.ok(response);
     }
@@ -270,7 +270,7 @@ public class AuthController {
                         ),
 
                         new EmailVerificationResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -297,24 +297,11 @@ public class AuthController {
 
         EmailResendResponse response = new EmailResendResponse(
                 new EmailResendResponse.Data(true, result.expiresAt()),
-                new EmailResendResponse.Meta(resolveRequestId(requestId)));
+                new EmailResendResponse.Meta(RequestIdResolver.resolve(requestId)));
 
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(response);
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 
     @PostMapping("/phone/request-otp")
@@ -341,7 +328,7 @@ public class AuthController {
                         result.maxAttempts()
                 ),
                 new PhoneOtpRequestResponse.Meta(
-                        resolveRequestId(requestId)
+                        RequestIdResolver.resolve(requestId)
                 )
         );
 
@@ -373,7 +360,7 @@ public class AuthController {
                 ),
 
                 new PhoneOtpVerifyResponse.Meta(
-                        resolveRequestId(requestId)
+                        RequestIdResolver.resolve(requestId)
                 )
         );
 
@@ -399,7 +386,7 @@ public class AuthController {
                 ),
 
                 new PasswordForgotResponse.Meta(
-                        resolveRequestId(requestId))
+                        RequestIdResolver.resolve(requestId))
                 );
 
         return ResponseEntity
@@ -443,9 +430,7 @@ public class AuthController {
                         ),
 
                         new MfaSetupResponse.Meta(
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -462,7 +447,7 @@ public class AuthController {
             @Valid @RequestBody MfaVerifyRequest request,
             @RequestHeader(name = "X-Request-ID", required = false) String requestId
     ) {
-        String resolvedRequestId = resolveRequestId(requestId);
+        String resolvedRequestId = RequestIdResolver.resolve(requestId);
 
         if (request.purpose() == MfaPurpose.ENROLL) {
             return verifyMfaEnrollment(

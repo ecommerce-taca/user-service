@@ -2,6 +2,7 @@ package com.ecommerce.authuser.shop.web.onboarding.profile;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.onboarding.profile.UpdateSellerProfileCommand;
 import com.ecommerce.authuser.shop.application.onboarding.profile.UpdateSellerProfileResult;
 import com.ecommerce.authuser.shop.application.onboarding.profile.UpdateSellerProfileService;
@@ -69,24 +70,10 @@ public class UpdateSellerProfileController {
                                 result.blockers()
                         ),
                         new UpdateSellerProfileResponse.Meta(
-                                resolveRequestId(requestId)
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
         return ResponseEntity.ok(response);
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

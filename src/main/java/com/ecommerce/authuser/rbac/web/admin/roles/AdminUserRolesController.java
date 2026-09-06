@@ -2,6 +2,7 @@ package com.ecommerce.authuser.rbac.web.admin.roles;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.rbac.application.admin.roles.GetAdminUserRolesQuery;
 import com.ecommerce.authuser.rbac.application.admin.roles.GetAdminUserRolesResult;
 import com.ecommerce.authuser.rbac.application.admin.roles.GetAdminUserRolesService;
@@ -99,9 +100,7 @@ public class AdminUserRolesController {
                 ),
 
                 new AdminUserRolesResponse.Meta(
-                        resolveRequestId(
-                                requestId
-                        )
+                        RequestIdResolver.resolve(requestId)
                 )
         );
     }
@@ -117,18 +116,5 @@ public class AdminUserRolesController {
                 assignment.grantedAt(),
                 assignment.grantedBy()
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }

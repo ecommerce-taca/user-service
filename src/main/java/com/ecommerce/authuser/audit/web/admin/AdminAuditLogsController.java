@@ -11,6 +11,7 @@ import com.ecommerce.authuser.audit.exception.InvalidAdminAuditQueryException;
 
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
+import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
 
 import lombok.RequiredArgsConstructor;
@@ -113,9 +114,7 @@ public class AdminAuditLogsController {
                                 result.size(),
                                 result.total(),
                                 result.totalPages(),
-                                resolveRequestId(
-                                        requestId
-                                )
+                                RequestIdResolver.resolve(requestId)
                         )
                 );
 
@@ -283,18 +282,5 @@ public class AdminAuditLogsController {
                 item.metadata(),
                 item.occurredAt()
         );
-    }
-
-    private String resolveRequestId(String requestId) {
-
-        if (requestId != null
-                && !requestId.isBlank()
-                && requestId.length() <= 64) {
-            return requestId;
-        }
-
-        return UuidV7Generator
-                .generate()
-                .toString();
     }
 }
