@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.mfa.application.admin;
 
-import com.ecommerce.authuser.auth.exception.MfaStepUpRequiredException;
+import com.ecommerce.authuser.auth.exception.mfa.MfaStepUpRequiredException;
 import com.ecommerce.authuser.auth.exception.mfa.MfaAuthenticationRequiredException;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 

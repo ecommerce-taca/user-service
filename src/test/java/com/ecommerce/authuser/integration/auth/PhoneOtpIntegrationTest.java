@@ -1,7 +1,7 @@
 package com.ecommerce.authuser.integration.auth;
 
-import com.ecommerce.authuser.auth.web.PhoneOtpRequest;
-import com.ecommerce.authuser.auth.web.PhoneOtpVerifyRequest;
+import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpRequest;
+import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpVerifyRequest;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 import com.ecommerce.authuser.support.base.BaseIntegrationTest;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;

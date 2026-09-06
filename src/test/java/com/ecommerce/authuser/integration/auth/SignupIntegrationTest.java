@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.integration.auth;
 
-import com.ecommerce.authuser.auth.web.SignupRequest;
+import com.ecommerce.authuser.auth.web.signup.SignupRequest;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.rbac.domain.UserRole;

@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.auth.application.mfa;
 
-import com.ecommerce.authuser.auth.exception.AccountSuspendedException;
+import com.ecommerce.authuser.auth.exception.signin.AccountSuspendedException;
 
 import com.ecommerce.authuser.auth.exception.mfa.MfaAlreadyEnabledException;
 import com.ecommerce.authuser.auth.exception.mfa.MfaSetupForbiddenException;
