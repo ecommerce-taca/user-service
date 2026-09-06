@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.favorite.web.contains;
 
-import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.common.id.CanonicalUuidParser;
 
 import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.favorite.application.contains.ContainsFavoritesQuery;
@@ -107,28 +107,14 @@ public class ContainsFavoritesController {
                 throw new InvalidFavoriteQueryException();
             }
 
-            productIds.add(parseCanonicalUuid(normalized));
+            productIds.add(
+                    CanonicalUuidParser.parse(
+                            normalized,
+                            InvalidFavoriteQueryException::new
+                    )
+            );
         }
 
         return List.copyOf(productIds);
-    }
-
-    private UUID parseCanonicalUuid(String value) {
-
-        try {
-            UUID productId = UUID.fromString(value);
-
-            if (!productId
-                    .toString()
-                    .equalsIgnoreCase(value)) {
-
-                throw new InvalidFavoriteQueryException();
-            }
-
-            return productId;
-
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidFavoriteQueryException();
-        }
     }
 }

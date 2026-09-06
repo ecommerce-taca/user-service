@@ -39,6 +39,9 @@ import com.ecommerce.authuser.user.domain.User;
 import com.ecommerce.authuser.user.domain.UserStatus;
 import com.ecommerce.authuser.user.repository.UserRepository;
 
+import static com.ecommerce.authuser.auth.application.support.AuthTokenPolicy.ACCESS_TOKEN_TTL;
+import static com.ecommerce.authuser.auth.application.support.AuthTokenPolicy.REFRESH_TOKEN_TTL;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -54,10 +57,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MfaLoginVerifyService {
-
-    private static final Duration ACCESS_TOKEN_TTL = Duration.ofMinutes(15);
-
-    private static final Duration REFRESH_TOKEN_TTL = Duration.ofDays(30);
 
     private static final int MAX_ATTEMPTS = 5;
 

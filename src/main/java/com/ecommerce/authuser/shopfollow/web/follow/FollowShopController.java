@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.shopfollow.web.follow;
 
-import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.common.id.CanonicalUuidParser;
 
 import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shopfollow.application.follow.FollowShopCommand;
@@ -41,7 +41,11 @@ public class FollowShopController {
 
         UUID userId = UUID.fromString(jwt.getSubject());
 
-        UUID parsedShopId = parseShopId(shopId);
+        UUID parsedShopId =
+                CanonicalUuidParser.parse(
+                        shopId,
+                        InvalidShopFollowInputException::new
+                );
 
         FollowShopResult result =
                 followShopService.follow(
@@ -70,30 +74,5 @@ public class FollowShopController {
         return ResponseEntity
                 .status(status)
                 .body(response);
-    }
-
-    private UUID parseShopId(String value) {
-
-        if (value == null || value.isBlank()) {
-            throw new InvalidShopFollowInputException();
-        }
-
-        String normalized = value.strip();
-
-        try {
-
-            UUID shopId = UUID.fromString(normalized);
-
-            if (!shopId
-                    .toString()
-                    .equalsIgnoreCase(normalized)) {
-                throw new InvalidShopFollowInputException();
-            }
-
-            return shopId;
-
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidShopFollowInputException();
-        }
     }
 }

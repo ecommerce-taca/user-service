@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.shop.web.publicprofile;
 
-import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.common.id.CanonicalUuidParser;
 
 import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shop.application.publicprofile.GetPublicShopQuery;
@@ -38,7 +38,11 @@ public class GetPublicShopController {
             @RequestHeader(name = "X-Request-ID", required = false) String requestId
     ) {
 
-        UUID parsedShopId = parseCanonicalUuid(shopId);
+        UUID parsedShopId =
+                CanonicalUuidParser.parse(
+                        shopId,
+                        InvalidPublicShopQueryException::new
+                );
 
         GetPublicShopResult result =
                 getPublicShopService.get(
@@ -73,29 +77,5 @@ public class GetPublicShopController {
         return ResponseEntity.ok(
                 response
         );
-    }
-
-    private UUID parseCanonicalUuid(String value) {
-        if (value == null || value.isBlank()) {
-            throw new InvalidPublicShopQueryException();
-        }
-
-        String normalized = value.strip();
-
-        try {
-
-            UUID shopId = UUID.fromString(normalized);
-
-            if (!shopId
-                    .toString()
-                    .equalsIgnoreCase(normalized)) {
-                throw new InvalidPublicShopQueryException();
-            }
-
-            return shopId;
-
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidPublicShopQueryException();
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.auth.web.mfa;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.List;
 
 public record MfaEnrollVerifyResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -23,12 +24,5 @@ public record MfaEnrollVerifyResponse(
         public Data {recoveryCodes = List.copyOf(recoveryCodes);
 
         }
-    }
-
-    public record Meta(
-            @JsonProperty("request_id")
-            String requestId
-
-    ) {
     }
 }

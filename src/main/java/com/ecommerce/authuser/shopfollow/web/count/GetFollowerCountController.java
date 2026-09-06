@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.shopfollow.web.count;
 
-import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.common.id.CanonicalUuidParser;
 
 import com.ecommerce.authuser.common.web.RequestIdResolver;
 import com.ecommerce.authuser.shopfollow.application.count.GetFollowerCountQuery;
@@ -33,7 +33,11 @@ public class GetFollowerCountController {
             @RequestHeader(name = "X-Request-ID", required = false) String requestId
     ) {
 
-        UUID parsedShopId = parseCanonicalUuid(shopId);
+        UUID parsedShopId =
+                CanonicalUuidParser.parse(
+                        shopId,
+                        InvalidShopFollowQueryException::new
+                );
 
         GetFollowerCountResult result =
                 getFollowerCountService.get(
@@ -54,30 +58,5 @@ public class GetFollowerCountController {
                 );
 
         return ResponseEntity.ok(response);
-    }
-
-    private UUID parseCanonicalUuid(String value) {
-
-        if (value == null || value.isBlank()) {
-            throw new InvalidShopFollowQueryException();
-        }
-
-        String normalized = value.strip();
-
-        try {
-            UUID shopId = UUID.fromString(normalized);
-
-            if (!shopId
-                    .toString()
-                    .equalsIgnoreCase(normalized)) {
-
-                throw new InvalidShopFollowQueryException();
-            }
-
-            return shopId;
-
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidShopFollowQueryException();
-        }
     }
 }

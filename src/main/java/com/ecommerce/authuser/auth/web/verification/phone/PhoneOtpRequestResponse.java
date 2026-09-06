@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.auth.web.verification.phone;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 public record PhoneOtpRequestResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -22,13 +23,6 @@ public record PhoneOtpRequestResponse(
 
             @JsonProperty("max_attempts")
             int maxAttempts
-    ) {
-    }
-
-    public record Meta(
-
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

@@ -1,12 +1,13 @@
 package com.ecommerce.authuser.auth.web.verification.email;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
 public record EmailResendResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -14,12 +15,6 @@ public record EmailResendResponse(
 
             @JsonProperty("expires_at")
             Instant expiresAt
-    ) {
-    }
-
-    public record Meta(
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

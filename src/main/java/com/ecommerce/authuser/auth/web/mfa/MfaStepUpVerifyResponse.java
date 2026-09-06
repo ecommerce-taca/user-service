@@ -1,12 +1,13 @@
 package com.ecommerce.authuser.auth.web.mfa;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
 public record MfaStepUpVerifyResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -16,13 +17,6 @@ public record MfaStepUpVerifyResponse(
 
             @JsonProperty("expires_at")
             Instant expiresAt
-    ) {
-    }
-
-    public record Meta(
-
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

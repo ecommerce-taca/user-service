@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.shopfollow.web.unfollow;
 
+import com.ecommerce.authuser.common.id.CanonicalUuidParser;
 import com.ecommerce.authuser.shopfollow.application.unfollow.UnfollowShopCommand;
 import com.ecommerce.authuser.shopfollow.application.unfollow.UnfollowShopService;
 import com.ecommerce.authuser.shopfollow.exception.InvalidShopFollowInputException;
@@ -33,7 +34,11 @@ public class UnfollowShopController {
 
         UUID userId = UUID.fromString(jwt.getSubject());
 
-        UUID parsedShopId = parseShopId(shopId);
+        UUID parsedShopId =
+                CanonicalUuidParser.parse(
+                        shopId,
+                        InvalidShopFollowInputException::new
+                );;
 
         unfollowShopService.unfollow(
                 new UnfollowShopCommand(
@@ -45,30 +50,5 @@ public class UnfollowShopController {
         return ResponseEntity
                 .noContent()
                 .build();
-    }
-
-    private UUID parseShopId(String value) {
-
-        if (value == null || value.isBlank()) {
-            throw new InvalidShopFollowInputException();
-        }
-
-        String normalized = value.strip();
-
-        try {
-
-            UUID shopId = UUID.fromString(normalized);
-
-            if (!shopId
-                    .toString()
-                    .equalsIgnoreCase(normalized)) {
-                throw new InvalidShopFollowInputException();
-            }
-
-            return shopId;
-
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidShopFollowInputException();
-        }
     }
 }
