@@ -31,6 +31,13 @@ public class SecurityConfig {
                                 .permitAll()
 
                                 .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/api/v1/shops/*",
+                                        "/api/v1/shops/*/followers/count"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
                                         HttpMethod.POST,
                                         "/api/v1/auth/signup",
                                         "/api/v1/auth/signin",
