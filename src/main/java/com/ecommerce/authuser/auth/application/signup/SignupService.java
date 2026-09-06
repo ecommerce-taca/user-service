@@ -24,6 +24,8 @@ import com.ecommerce.authuser.token.repository.RefreshTokenRepository;
 import com.ecommerce.authuser.token.repository.VerificationTokenRepository;
 import com.ecommerce.authuser.user.domain.User;
 import com.ecommerce.authuser.user.repository.UserRepository;
+import static com.ecommerce.authuser.auth.application.support.AuthTokenPolicy.ACCESS_TOKEN_TTL;
+import static com.ecommerce.authuser.auth.application.support.AuthTokenPolicy.REFRESH_TOKEN_TTL;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,11 +40,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SignupService {
 
-    private static final Duration REFRESH_TOKEN_TTL = Duration.ofDays(30);
-
     private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofHours(24);
-
-    private static final Duration ACCESS_TOKEN_TTL = Duration.ofMinutes(15);
 
     private final UserRepository userRepository;
 
