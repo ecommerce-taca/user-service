@@ -1,5 +1,7 @@
 package com.ecommerce.authuser.auth.web.signin;
 
+import com.ecommerce.authuser.auth.web.common.AuthTokenData;
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -7,12 +9,12 @@ import java.util.UUID;
 
 public record SigninResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
             UserData user,
-            TokenData tokens
+            AuthTokenData tokens
     ) {
     }
 
@@ -35,31 +37,6 @@ public record SigninResponse(
             List<String> roles,
 
             String status
-    ) {
-    }
-
-    public record TokenData(
-
-            @JsonProperty("token_type")
-            String tokenType,
-
-            @JsonProperty("access_token")
-            String accessToken,
-
-            @JsonProperty("expires_in")
-            long expiresIn,
-
-            @JsonProperty("refresh_token")
-            String refreshToken,
-
-            @JsonProperty("refresh_expires_in")
-            long refreshExpiresIn
-    ) {
-    }
-
-    public record Meta(
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

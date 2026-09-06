@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.auth.web.mfa;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 public record MfaSetupResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -23,12 +24,6 @@ public record MfaSetupResponse(
 
             @JsonProperty("expires_at")
             Instant expiresAt
-    ) {
-    }
-
-    public record Meta(
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

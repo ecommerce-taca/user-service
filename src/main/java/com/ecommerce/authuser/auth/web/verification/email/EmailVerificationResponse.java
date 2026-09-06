@@ -1,5 +1,6 @@
 package com.ecommerce.authuser.auth.web.verification.email;
 
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 public record EmailVerificationResponse(
         Data data,
-        Meta meta
+        RequestMeta meta
 ) {
 
     public record Data(
@@ -20,13 +21,6 @@ public record EmailVerificationResponse(
 
             @JsonProperty("verified_at")
             Instant verifiedAt
-    ) {
-    }
-
-    public record Meta(
-
-            @JsonProperty("request_id")
-            String requestId
     ) {
     }
 }

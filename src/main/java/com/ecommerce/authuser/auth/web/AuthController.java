@@ -7,6 +7,7 @@ import com.ecommerce.authuser.auth.application.signin.SigninCommand;
 import com.ecommerce.authuser.auth.application.signin.SigninResult;
 import com.ecommerce.authuser.auth.application.signin.SigninService;
 import com.ecommerce.authuser.auth.application.signout.SignoutCommand;
+import com.ecommerce.authuser.auth.web.common.AuthTokenData;
 import com.ecommerce.authuser.auth.web.session.SignoutRequest;
 import com.ecommerce.authuser.auth.application.signout.SignoutService;
 import com.ecommerce.authuser.auth.application.signup.SignupCommand;
@@ -37,6 +38,7 @@ import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpVerifyResponse
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 
 import com.ecommerce.authuser.common.web.RequestIdResolver;
+import com.ecommerce.authuser.common.web.RequestMeta;
 import com.ecommerce.authuser.mfa.domain.MfaMethod;
 import com.ecommerce.authuser.mfa.domain.MfaPurpose;
 import jakarta.servlet.http.HttpServletRequest;
@@ -116,7 +118,7 @@ public class AuthController {
                                 "ACTIVE"
                         ),
 
-                        new SignupResponse.TokenData(
+                        new AuthTokenData(
                                 "Bearer",
                                 result.accessToken(),
                                 result.accessExpiresIn(),
@@ -130,7 +132,7 @@ public class AuthController {
                         )
                 ),
 
-                new SignupResponse.Meta(resolvedRequestId)
+                new RequestMeta(resolvedRequestId)
         );
 
         return ResponseEntity
@@ -170,7 +172,7 @@ public class AuthController {
                                 result.status()
                         ),
 
-                        new SigninResponse.TokenData(
+                        new AuthTokenData(
                                 "Bearer",
                                 result.accessToken(),
                                 result.accessExpiresIn(),
@@ -179,7 +181,7 @@ public class AuthController {
                         )
                 ),
 
-                new SigninResponse.Meta(resolvedRequestId)
+                new RequestMeta(resolvedRequestId)
         );
 
         return ResponseEntity.ok(
@@ -202,16 +204,16 @@ public class AuthController {
 
         RefreshResponse response = new RefreshResponse(
                 new RefreshResponse.Data(
-                        new RefreshResponse.TokenData(
-                                "Bearer",
-                                result.accessToken(),
-                                result.accessExpiresIn(),
-                                result.refreshToken(),
-                                result.refreshExpiresIn()
+                        new AuthTokenData(
+                            "Bearer",
+                            result.accessToken(),
+                            result.accessExpiresIn(),
+                            result.refreshToken(),
+                            result.refreshExpiresIn()
                         )
                 ),
 
-                new RefreshResponse.Meta(RequestIdResolver.resolve(requestId)));
+                new RequestMeta(RequestIdResolver.resolve(requestId)));
 
         return ResponseEntity.ok(response);
     }
@@ -269,9 +271,7 @@ public class AuthController {
                                 result.verifiedAt()
                         ),
 
-                        new EmailVerificationResponse.Meta(
-                                RequestIdResolver.resolve(requestId)
-                        )
+                        new RequestMeta(RequestIdResolver.resolve(requestId))
                 );
 
         return ResponseEntity.ok(response);
@@ -297,7 +297,7 @@ public class AuthController {
 
         EmailResendResponse response = new EmailResendResponse(
                 new EmailResendResponse.Data(true, result.expiresAt()),
-                new EmailResendResponse.Meta(RequestIdResolver.resolve(requestId)));
+                new RequestMeta(RequestIdResolver.resolve(requestId)));
 
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
@@ -327,9 +327,8 @@ public class AuthController {
                         result.expiresAt(),
                         result.maxAttempts()
                 ),
-                new PhoneOtpRequestResponse.Meta(
-                        RequestIdResolver.resolve(requestId)
-                )
+
+                new RequestMeta(RequestIdResolver.resolve(requestId))
         );
 
         return ResponseEntity
@@ -359,9 +358,7 @@ public class AuthController {
                         result.verifiedAt()
                 ),
 
-                new PhoneOtpVerifyResponse.Meta(
-                        RequestIdResolver.resolve(requestId)
-                )
+                new RequestMeta(RequestIdResolver.resolve(requestId))
         );
 
         return ResponseEntity.ok(
@@ -385,7 +382,7 @@ public class AuthController {
                         "Nếu tài khoản tồn tại, hướng dẫn đặt lại mật khẩu sẽ được gửi."
                 ),
 
-                new PasswordForgotResponse.Meta(
+                new RequestMeta(
                         RequestIdResolver.resolve(requestId))
                 );
 
@@ -429,7 +426,7 @@ public class AuthController {
                                 result.expiresAt()
                         ),
 
-                        new MfaSetupResponse.Meta(
+                        new RequestMeta(
                                 RequestIdResolver.resolve(requestId)
                         )
                 );
@@ -507,7 +504,7 @@ public class AuthController {
                         result.recoveryCodes()
                 ),
 
-                new MfaEnrollVerifyResponse.Meta(requestId)
+                new RequestMeta(requestId)
         );
 
         return ResponseEntity
@@ -536,15 +533,15 @@ public class AuthController {
 
         MfaLoginVerifyResponse response = new MfaLoginVerifyResponse(
                 new MfaLoginVerifyResponse.Data(
-                        new MfaLoginVerifyResponse.TokenData(
-                                "Bearer",
-                                result.accessToken(),
-                                result.accessExpiresIn(),
-                                result.refreshToken(),
-                                result.refreshExpiresIn()
+                        new AuthTokenData(
+                            "Bearer",
+                            result.accessToken(),
+                            result.accessExpiresIn(),
+                            result.refreshToken(),
+                            result.refreshExpiresIn()
                         )
                 ),
-                new MfaLoginVerifyResponse.Meta(requestId)
+                new RequestMeta(requestId)
         );
 
         return ResponseEntity
@@ -603,7 +600,7 @@ public class AuthController {
                         result.expiresAt()
                 ),
 
-                new MfaStepUpVerifyResponse.Meta(requestId)
+                new RequestMeta(requestId)
                 );
 
         return ResponseEntity
