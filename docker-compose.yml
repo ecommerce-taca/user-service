@@ -1,50 +1,85 @@
+name: auth-user
+
 services:
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: taca/auth-user-service:local
+
+    ports:
+      - "127.0.0.1:8081:8081"
+
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SERVER_PORT: 8081
+
+      DB_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-userdb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&tinyInt1isBit=false"
+      DB_USERNAME: "${MYSQL_USER:-ecommerce}"
+      DB_PASSWORD: "${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}"
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_CONNECT_TIMEOUT: 2s
+      REDIS_TIMEOUT: 2s
+
+      AUTH_OUTBOX_ENCRYPTION_KEY_BASE64: "${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64:?Missing AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}"
+      AUTH_AUDIT_HASH_KEY_BASE64: "${AUTH_AUDIT_HASH_KEY_BASE64:?Missing AUTH_AUDIT_HASH_KEY_BASE64}"
+      AUTH_OTP_HASH_KEY_BASE64: "${AUTH_OTP_HASH_KEY_BASE64:?Missing AUTH_OTP_HASH_KEY_BASE64}"
+      AUTH_MFA_ENCRYPTION_KEY_BASE64: "${AUTH_MFA_ENCRYPTION_KEY_BASE64:?Missing AUTH_MFA_ENCRYPTION_KEY_BASE64}"
+
+      AUTH_JWT_PRIVATE_KEY_BASE64: "${AUTH_JWT_PRIVATE_KEY_BASE64:?Missing AUTH_JWT_PRIVATE_KEY_BASE64}"
+      AUTH_JWT_PUBLIC_KEY_BASE64: "${AUTH_JWT_PUBLIC_KEY_BASE64:?Missing AUTH_JWT_PUBLIC_KEY_BASE64}"
+      JWT_KEY_ID: "${JWT_KEY_ID:-auth-user-key-local-1}"
+
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    restart: unless-stopped
 
   mysql:
     image: mysql:8.4
-    container_name: auth-user-mysql
 
     environment:
-      MYSQL_DATABASE: userdb
-      MYSQL_USER: ecommerce
-      MYSQL_PASSWORD: ecommerce
-      MYSQL_ROOT_PASSWORD: root
-
-    ports:
-      - "3306:3306"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-userdb}"
+      MYSQL_USER: "${MYSQL_USER:-ecommerce}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}"
 
     volumes:
       - auth_user_mysql_data:/var/lib/mysql
 
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"
-        ]
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 30s
+
+    restart: unless-stopped
 
   redis:
     image: redis:7.4-alpine
-    container_name: auth-user-redis
-
-    ports:
-      - "6379:6379"
 
     healthcheck:
       test:
-        [
-          "CMD",
-          "redis-cli",
-          "ping"
-        ]
+        - CMD
+        - redis-cli
+        - ping
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 5s
+
+    restart: unless-stopped
 
 volumes:
   auth_user_mysql_data:

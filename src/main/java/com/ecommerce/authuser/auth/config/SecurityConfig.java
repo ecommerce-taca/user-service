@@ -38,6 +38,13 @@ public class SecurityConfig {
                                 .permitAll()
 
                                 .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/actuator/health",
+                                        "/actuator/health/**"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
                                         HttpMethod.POST,
                                         "/api/v1/auth/signup",
                                         "/api/v1/auth/signin",
