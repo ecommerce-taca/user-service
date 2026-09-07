@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Build output
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation not needed for build
+README.md
+HELP.md
