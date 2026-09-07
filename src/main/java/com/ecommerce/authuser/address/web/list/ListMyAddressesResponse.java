@@ -1,0 +1,50 @@
+package com.ecommerce.authuser.address.web.list;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+public record ListMyAddressesResponse(
+        List<Data> data,
+        Meta meta
+) {
+
+    public record Data(
+            UUID id,
+            String recipient,
+            String phone,
+            String line1,
+            String line2,
+            String ward,
+            String district,
+            String province,
+
+            @JsonProperty("postal_code")
+            String postalCode,
+
+            @JsonProperty("is_default")
+            boolean defaultAddress,
+
+            @JsonProperty("created_at")
+            Instant createdAt,
+
+            @JsonProperty("updated_at")
+            Instant updatedAt
+    ) {
+    }
+
+    public record Meta(
+            int page,
+            int size,
+            long total,
+
+            @JsonProperty("total_pages")
+            int totalPages,
+
+            @JsonProperty("request_id")
+            String requestId
+    ) {
+    }
+}
