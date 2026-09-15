@@ -95,8 +95,25 @@ public class JwtKeyConfiguration {
         }
     }
 
+//    @Bean
+//    public JwtEncoder jwtEncoder(KeyPair jwtKeyPair) {
+//
+//        RSAPublicKey publicKey =
+//                (RSAPublicKey) jwtKeyPair.getPublic();
+//
+//        RSAPrivateKey privateKey =
+//                (RSAPrivateKey) jwtKeyPair.getPrivate();
+//
+//        return NimbusJwtEncoder
+//                .withKeyPair(publicKey, privateKey)
+//                .build();
+//    }
+
     @Bean
-    public JwtEncoder jwtEncoder(KeyPair jwtKeyPair) {
+    public JwtEncoder jwtEncoder(
+            KeyPair jwtKeyPair,
+            JwtKeyProperties properties
+    ) {
 
         RSAPublicKey publicKey =
                 (RSAPublicKey) jwtKeyPair.getPublic();
@@ -104,9 +121,19 @@ public class JwtKeyConfiguration {
         RSAPrivateKey privateKey =
                 (RSAPrivateKey) jwtKeyPair.getPrivate();
 
-        return NimbusJwtEncoder
-                .withKeyPair(publicKey, privateKey)
+        RSAKey jwk = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID(properties.keyId())
+                .keyUse(KeyUse.SIGNATURE)
+                .algorithm(JWSAlgorithm.RS256)
                 .build();
+
+        JWKSource<SecurityContext> jwkSource =
+                new ImmutableJWKSet<>(
+                        new JWKSet(jwk)
+                );
+
+        return new NimbusJwtEncoder(jwkSource);
     }
 
     @Bean
