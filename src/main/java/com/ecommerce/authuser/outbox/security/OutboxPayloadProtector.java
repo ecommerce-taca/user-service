@@ -8,4 +8,9 @@ public interface OutboxPayloadProtector {
             String context,
             Map<String, Object> payload
     );
+
+    Map<String, Object> unprotect(
+            String context,
+            Map<String, Object> protectedPayload
+    );
 }
