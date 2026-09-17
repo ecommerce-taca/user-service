@@ -101,4 +101,77 @@ public class AesGcmOutboxPayloadProtector
             );
         }
     }
+
+    @Override
+    public Map<String, Object> unprotect(
+            String context,
+            Map<String, Object> protectedPayload
+    ) {
+        if (protectedPayload == null) {
+            throw new IllegalArgumentException(
+                    "protectedPayload must not be null"
+            );
+        }
+
+        if (!Boolean.TRUE.equals(protectedPayload.get("protected"))) {
+            return Map.copyOf(protectedPayload);
+        }
+
+        try {
+            String ivText = requireText(protectedPayload, "iv");
+            String ciphertextText = requireText(protectedPayload, "ciphertext");
+
+            byte[] iv = Base64.getUrlDecoder().decode(ivText);
+            byte[] ciphertext = Base64.getUrlDecoder().decode(ciphertextText);
+
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+
+            cipher.init(
+                    Cipher.DECRYPT_MODE,
+                    secretKey,
+                    new GCMParameterSpec(TAG_LENGTH_BITS, iv)
+            );
+
+            cipher.updateAAD(context.getBytes(StandardCharsets.UTF_8));
+
+            byte[] plaintext = cipher.doFinal(ciphertext);
+
+            return readPayload(plaintext);
+
+        } catch (GeneralSecurityException | JacksonException ex) {
+            throw new IllegalStateException(
+                    "Cannot unprotect outbox payload",
+                    ex
+            );
+        }
+    }
+
+    private String requireText(
+            Map<String, Object> payload,
+            String field
+    ) {
+        Object value = payload.get(field);
+
+        if (!(value instanceof String text) || text.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Missing protected payload field: " + field
+            );
+        }
+
+        return text;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> readPayload(byte[] plaintext)
+            throws JacksonException {
+        Object value = objectMapper.readValue(plaintext, Map.class);
+
+        if (!(value instanceof Map<?, ?> map)) {
+            throw new IllegalStateException(
+                    "Protected payload must decode to object"
+            );
+        }
+
+        return Map.copyOf((Map<String, Object>) map);
+    }
 }
