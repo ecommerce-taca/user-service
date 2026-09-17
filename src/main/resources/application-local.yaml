@@ -34,6 +34,21 @@ spring:
       connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
       timeout: ${REDIS_TIMEOUT:2s}
 
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 10000
+
 auth:
   outbox:
     encryption-key-base64: ${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}
@@ -54,3 +69,17 @@ auth:
 
     previous-key-id: ${JWT_PREVIOUS_KEY_ID:}
     previous-public-key-base64: ${JWT_PREVIOUS_PUBLIC_KEY_BASE64:}
+
+  outbox-publisher:
+    enabled: true
+    batch-size: 50
+    fixed-delay-ms: 2000
+    max-retries: 3
+    retry-backoff-seconds: 2
+
+  kafka:
+    topics:
+      notification-commands: notification.commands.v1
+      user-events: user.events.v1
+      shop-events: shop.events.v1
+      dlq: auth-user.events.dlq.v1
