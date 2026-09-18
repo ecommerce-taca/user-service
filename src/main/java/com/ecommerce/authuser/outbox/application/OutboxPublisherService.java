@@ -60,11 +60,15 @@ public class OutboxPublisherService {
     }
 
     private void publishOne(OutboxEvent event, Instant now) {
+        Map<String, Object> payloadForDlq = event.getPayloadView();
+
         try {
             Map<String, Object> payload = outboxPayloadProtector.unprotect(
                     event.getEventType(),
                     event.getPayloadView()
             );
+
+            payloadForDlq = payload;
 
             OutboxMessageEnvelope envelope = OutboxMessageEnvelope.from(event, payload);
             String topic = outboxTopicResolver.resolveTopic(event);
@@ -81,6 +85,40 @@ public class OutboxPublisherService {
                     retryAt,
                     properties.getMaxRetries()
             );
+
+            if (event.getFailedAt() != null) {
+                publishDlq(event, payloadForDlq, ex);
+            }
         }
+    }
+
+    private void publishDlq(
+            OutboxEvent event,
+            Map<String, Object> payload,
+            RuntimeException publishException
+    ) {
+        Map<String, Object> dlqPayload = Map.of(
+                "original_event_type", event.getEventType(),
+                "original_aggregate_type", event.getAggregateType().name(),
+                "original_aggregate_id", event.getAggregateId().toString(),
+                "original_partition_key", event.getPartitionKey(),
+                "original_payload", payload,
+                "failure_code", ERROR_CODE,
+                "failure_message", safeMessage(publishException),
+                "attempt_count", event.getAttemptCount()
+        );
+
+        OutboxMessageEnvelope dlqEnvelope = OutboxMessageEnvelope.from(event, dlqPayload);
+        String dlqTopic = outboxTopicResolver.resolveDlqTopic();
+
+        kafkaOutboxMessageProducer.publish(dlqTopic, dlqEnvelope);
+    }
+
+    private String safeMessage(RuntimeException ex) {
+        if (ex.getMessage() == null || ex.getMessage().isBlank()) {
+            return ex.getClass().getSimpleName();
+        }
+
+        return ex.getMessage();
     }
 }

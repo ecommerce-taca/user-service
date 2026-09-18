@@ -19,11 +19,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class OutboxPublisherServiceTest {
 
@@ -134,6 +130,8 @@ class OutboxPublisherServiceTest {
                 .thenReturn(Map.of("user_id", userId.toString()));
         when(outboxTopicResolver.resolveTopic(event))
                 .thenReturn("user.events.v1");
+        when(outboxTopicResolver.resolveDlqTopic())
+                .thenReturn("auth-user.events.dlq.v1");
 
         doThrow(new IllegalStateException("Kafka down"))
                 .when(kafkaOutboxMessageProducer)
@@ -160,6 +158,49 @@ class OutboxPublisherServiceTest {
 
         assertThat(publishedCount).isZero();
         verifyNoInteractions(outboxEventRepository);
+    }
+
+    @Test
+    void publishPendingBatch_shouldPublishDlqWhenMaxRetriesReached() {
+        OutboxPublisherProperties properties = properties();
+        properties.setMaxRetries(1);
+
+        UUID userId = UUID.randomUUID();
+
+        OutboxEvent event = OutboxEvent.create(
+                OutboxAggregateType.USER,
+                userId,
+                "user.created",
+                (short) 1,
+                userId.toString(),
+                Map.of("protected", true)
+        );
+
+        when(outboxEventRepository.findPendingForUpdate(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(event));
+        when(outboxPayloadProtector.unprotect("user.created", event.getPayloadView()))
+                .thenReturn(Map.of("user_id", userId.toString()));
+        when(outboxTopicResolver.resolveTopic(event))
+                .thenReturn("user.events.v1");
+        when(outboxTopicResolver.resolveDlqTopic())
+                .thenReturn("auth-user.events.dlq.v1");
+
+        doThrow(new IllegalStateException("Kafka down"))
+                .when(kafkaOutboxMessageProducer)
+                .publish(eq("user.events.v1"), any(OutboxMessageEnvelope.class));
+
+        OutboxPublisherService service = service(properties);
+
+        service.publishPendingBatch();
+
+        verify(kafkaOutboxMessageProducer, times(1))
+                .publish(eq("user.events.v1"), any(OutboxMessageEnvelope.class));
+
+        verify(kafkaOutboxMessageProducer, times(1))
+                .publish(eq("auth-user.events.dlq.v1"), any(OutboxMessageEnvelope.class));
+
+        assertThat(event.getFailedAt()).isNotNull();
+        assertThat(event.getLastErrorCode()).isEqualTo("KAFKA_PUBLISH_FAILED");
     }
 
     private OutboxPublisherService service(OutboxPublisherProperties properties) {
