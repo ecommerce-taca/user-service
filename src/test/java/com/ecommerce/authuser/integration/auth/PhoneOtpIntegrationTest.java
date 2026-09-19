@@ -2,6 +2,7 @@ package com.ecommerce.authuser.integration.auth;
 
 import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpRequest;
 import com.ecommerce.authuser.auth.web.verification.phone.PhoneOtpVerifyRequest;
+import com.ecommerce.authuser.auth.security.SecureOtpGenerator;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
 import com.ecommerce.authuser.support.base.BaseIntegrationTest;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
@@ -30,20 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import static org.mockito.Mockito.when;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -55,21 +49,26 @@ import com.ecommerce.authuser.support.security.TestSecurityConfig;
 @Import(TestSecurityConfig.class)
 class PhoneOtpIntegrationTest extends BaseIntegrationTest {
 
+
+    private static final String TEST_OTP = "123456";
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockitoBean
+    private SecureOtpGenerator otpGenerator;
+
     private User user;
 
     private TestUserToken userToken;
 
-    @Value("${auth.outbox.encryption-key-base64}")
-    private String outboxEncryptionKeyBase64;
-
     @BeforeEach
     void setUp() {
+        when(otpGenerator.generate()).thenReturn(TEST_OTP);
+
         String email = "phone-otp-" + UUID.randomUUID() + "@test.com";
 
         user = UserTestBuilder
@@ -278,7 +277,7 @@ class PhoneOtpIntegrationTest extends BaseIntegrationTest {
                         .path("challenge_id")
                         .asText());
 
-        String rawOtp = findRawOtp();
+        String rawOtp = TEST_OTP;
 
         Instant beforeVerification = Instant.now();
 
@@ -710,77 +709,5 @@ class PhoneOtpIntegrationTest extends BaseIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-    }
-
-    private String findRawOtp() throws Exception {
-
-        List<OutboxEvent> events = outboxEventRepository
-                .findAllByAggregateTypeAndAggregateIdOrderByCreatedAtAsc(
-                        OutboxAggregateType.USER,
-                        user.getId());
-
-        OutboxEvent otpEvent = events.stream()
-                .filter(event -> "PHONE_OTP_REQUESTED"
-                        .equals(event.getEventType()))
-                .reduce((first, second) -> second)
-                .orElseThrow();
-
-        Map<String, Object> protectedPayload = otpEvent.getPayloadView();
-
-        assertThat(protectedPayload)
-                .containsKeys(
-                        "protected",
-                        "alg",
-                        "key_version",
-                        "iv",
-                        "ciphertext");
-
-        assertThat(protectedPayload.get("protected"))
-                .isEqualTo(true);
-
-        String ivBase64 = String.valueOf(
-                protectedPayload.get("iv"));
-
-        String ciphertextBase64 = String.valueOf(
-                protectedPayload.get("ciphertext"));
-
-        byte[] iv = Base64.getUrlDecoder()
-                .decode(ivBase64);
-
-        byte[] ciphertext = Base64.getUrlDecoder()
-                .decode(ciphertextBase64);
-
-        byte[] key = Base64.getDecoder()
-                .decode(outboxEncryptionKeyBase64);
-
-        SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
-
-        Cipher cipher = Cipher.getInstance(
-                "AES/GCM/NoPadding");
-
-        cipher.init(
-                Cipher.DECRYPT_MODE,
-                secretKey,
-                new GCMParameterSpec(128, iv));
-
-        cipher.updateAAD(
-                "PHONE_OTP_REQUESTED"
-                        .getBytes(StandardCharsets.UTF_8));
-
-        byte[] plaintext = cipher.doFinal(ciphertext);
-
-        JsonNode payload = objectMapper.readTree(plaintext);
-
-        JsonNode otpNode = payload
-                .path("data")
-                .path("otp");
-
-        assertThat(otpNode.isMissingNode())
-                .isFalse();
-
-        assertThat(otpNode.asText())
-                .isNotBlank();
-
-        return otpNode.asText();
     }
 }

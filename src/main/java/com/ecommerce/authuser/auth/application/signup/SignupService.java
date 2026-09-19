@@ -8,6 +8,7 @@ import com.ecommerce.authuser.auth.security.PasswordHasher;
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.outbox.application.NotificationLinkFactory;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -65,6 +66,8 @@ public class SignupService {
     private final OutboxEventRepository outboxEventRepository;
 
     private final OutboxPayloadProtector outboxPayloadProtector;
+
+    private final NotificationLinkFactory notificationLinkFactory;
 
     @Transactional
     public SignupResult signup(SignupCommand command) {
@@ -189,11 +192,21 @@ public class SignupService {
 
                                 "recipient", user.getEmail(),
 
-                                "display_name", user.getFullName(),
+                                "template",
+                                "auth-email-verification-v1",
 
-                                "verification_token", rawVerificationToken,
+                                "dedupe_key",
+                                "email-verification:"
+                                        + user.getId()
+                                        + ":"
+                                        + verificationToken.getId(),
 
-                                "expires_at", verificationExpiresAt.toString()
+                                "data",
+                                notificationLinkFactory.emailVerificationData(
+                                        user.getFullName(),
+                                        rawVerificationToken,
+                                        EMAIL_VERIFICATION_TTL
+                                )
                         )
                 )
         );
