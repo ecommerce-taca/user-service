@@ -70,7 +70,7 @@ public class OutboxPublisherService {
 
             payloadForDlq = payload;
 
-            OutboxMessageEnvelope envelope = OutboxMessageEnvelope.from(event, payload);
+            KafkaOutboxMessage envelope = toKafkaMessage(event, payload);
             String topic = outboxTopicResolver.resolveTopic(event);
 
             kafkaOutboxMessageProducer.publish(topic, envelope);
@@ -114,6 +114,17 @@ public class OutboxPublisherService {
         kafkaOutboxMessageProducer.publish(dlqTopic, dlqEnvelope);
     }
 
+    private KafkaOutboxMessage toKafkaMessage(
+            OutboxEvent event,
+            Map<String, Object> payload
+    ) {
+        if (outboxTopicResolver.isNotificationCommand(event.getEventType())) {
+            return NotificationCommandEnvelope.from(event, payload);
+        }
+
+        return OutboxMessageEnvelope.from(event, payload);
+    }
+    
     private String safeMessage(RuntimeException ex) {
         if (ex.getMessage() == null || ex.getMessage().isBlank()) {
             return ex.getClass().getSimpleName();

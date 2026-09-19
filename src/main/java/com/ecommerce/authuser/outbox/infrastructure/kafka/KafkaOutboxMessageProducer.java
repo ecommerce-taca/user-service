@@ -1,6 +1,6 @@
 package com.ecommerce.authuser.outbox.infrastructure.kafka;
 
-import com.ecommerce.authuser.outbox.application.OutboxMessageEnvelope;
+import com.ecommerce.authuser.outbox.application.KafkaOutboxMessage;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -35,7 +35,7 @@ public class KafkaOutboxMessageProducer {
 
     public void publish(
             String topic,
-            OutboxMessageEnvelope envelope
+            KafkaOutboxMessage envelope
     ) {
         if (topic == null || topic.isBlank()) {
             throw new IllegalArgumentException("topic must not be blank");
@@ -54,23 +54,8 @@ public class KafkaOutboxMessageProducer {
                     value
             );
 
-            addHeader(record, "event_id", envelope.eventId().toString());
-            addHeader(record, "event_type", envelope.eventType());
-            addHeader(
-                    record,
-                    "schema_version",
-                    Short.toString(envelope.schemaVersion())
-            );
-            addHeader(
-                    record,
-                    "aggregate_type",
-                    envelope.aggregateType().name()
-            );
-            addHeader(
-                    record,
-                    "aggregate_id",
-                    envelope.aggregateId().toString()
-            );
+            envelope.kafkaHeaders()
+                    .forEach((name, headerValue) -> addHeader(record, name, headerValue));
 
             kafkaTemplate
                     .send(record)
