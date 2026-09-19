@@ -183,6 +183,7 @@ public class AdminRoleAssignmentService {
         );
 
         createOutboxEvent(
+                command.actorUserId(),
                 targetUser,
                 targetRole,
                 shop,
@@ -444,6 +445,7 @@ public class AdminRoleAssignmentService {
     }
 
     private void createOutboxEvent(
+            UUID actorUserId,
             User targetUser,
             Role targetRole,
             Shop shop,
@@ -487,9 +489,10 @@ public class AdminRoleAssignmentService {
         );
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.USER,
                         targetUser.getId(),
+                        actorUserId,
                         "user.role_changed",
                         EVENT_SCHEMA_VERSION,
                         targetUser.getId().toString(),

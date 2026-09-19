@@ -115,9 +115,10 @@ public class UpdateMyProfileService {
             }
 
             OutboxEvent event =
-                    OutboxEvent.create(
+                    OutboxEvent.createWithActor(
                             OutboxAggregateType.USER,
                             user.getId(),
+                            command.userId(),
                             "user.updated",
                             (short) 1,
                             user.getId().toString(),

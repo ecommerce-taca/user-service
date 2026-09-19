@@ -37,10 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -134,9 +131,10 @@ public class AdminUserStatusService {
         );
 
         createOutboxEvent(
+                command.actorUserId(),
                 targetUser,
                 oldStatus,
-                newStatus,
+                targetUser.getStatus(),
                 reason
         );
 
@@ -280,6 +278,7 @@ public class AdminUserStatusService {
     }
 
     private void createOutboxEvent(
+            UUID actorUserId,
             User targetUser,
             UserStatus oldStatus,
             UserStatus newStatus,
@@ -298,9 +297,10 @@ public class AdminUserStatusService {
         payload.put("reason", reason);
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.USER,
                         targetUser.getId(),
+                        actorUserId,
                         "user.status_changed",
                         EVENT_SCHEMA_VERSION,
                         targetUser

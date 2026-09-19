@@ -380,9 +380,10 @@ public class AdminKycReviewService {
         }
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
                         shop.getId(),
+                        command.actorUserId(),
                         eventType,
                         EVENT_SCHEMA_VERSION,
                         shop.getId().toString(),
