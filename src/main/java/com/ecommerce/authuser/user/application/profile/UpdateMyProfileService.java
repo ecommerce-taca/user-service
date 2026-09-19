@@ -132,7 +132,10 @@ public class UpdateMyProfileService {
                                             "changed_fields",
                                             List.copyOf(
                                                     changedFields
-                                            )
+                                            ),
+
+                                            "updated_at",
+                                            user.getUpdatedAt().toString()
                                     )
                             )
                     );
