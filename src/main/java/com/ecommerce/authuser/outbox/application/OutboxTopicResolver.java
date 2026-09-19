@@ -10,7 +10,7 @@ import java.util.Set;
 @Component
 public class OutboxTopicResolver {
 
-    private static final Set<String> NOTIFICATION_COMMAND_TYPES = Set.of(
+    public static final Set<String> NOTIFICATION_COMMAND_TYPES = Set.of(
             "AUTH_VERIFICATION_REQUESTED",
             "PASSWORD_RESET_REQUESTED",
             "PHONE_OTP_REQUESTED"
@@ -54,5 +54,9 @@ public class OutboxTopicResolver {
 
     public String resolveDlqTopic() {
         return topics.getDlq();
+    }
+
+    public boolean isNotificationCommand(String eventType) {
+        return NOTIFICATION_COMMAND_TYPES.contains(eventType);
     }
 }

@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
-public record OutboxMessageEnvelope(
+public record OutboxMessageEnvelope (
         UUID eventId,
         String eventType,
         short schemaVersion,
@@ -16,7 +16,7 @@ public record OutboxMessageEnvelope(
         String partitionKey,
         Instant occurredAt,
         Map<String, Object> payload
-) {
+)  implements KafkaOutboxMessage {
 
     public static OutboxMessageEnvelope from(
             OutboxEvent event,
@@ -43,6 +43,17 @@ public record OutboxMessageEnvelope(
             event.getPartitionKey(),
             occurredAt,
             Map.copyOf(payload)
+        );
+    }
+
+    @Override
+    public Map<String, String> kafkaHeaders() {
+        return Map.of(
+                "event_id", eventId.toString(),
+                "event_type", eventType,
+                "schema_version", Short.toString(schemaVersion),
+                "aggregate_type", aggregateType.name(),
+                "aggregate_id", aggregateId.toString()
         );
     }
 
