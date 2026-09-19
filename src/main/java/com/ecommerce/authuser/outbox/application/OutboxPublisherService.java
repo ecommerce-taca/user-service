@@ -102,7 +102,7 @@ public class OutboxPublisherService {
                 "original_aggregate_type", event.getAggregateType().name(),
                 "original_aggregate_id", event.getAggregateId().toString(),
                 "original_partition_key", event.getPartitionKey(),
-                "original_payload", payload,
+                "original_payload_redacted", true,
                 "failure_code", ERROR_CODE,
                 "failure_message", safeMessage(publishException),
                 "attempt_count", event.getAttemptCount()
@@ -124,12 +124,8 @@ public class OutboxPublisherService {
 
         return OutboxMessageEnvelope.from(event, payload);
     }
-    
-    private String safeMessage(RuntimeException ex) {
-        if (ex.getMessage() == null || ex.getMessage().isBlank()) {
-            return ex.getClass().getSimpleName();
-        }
 
-        return ex.getMessage();
+    private String safeMessage(RuntimeException ex) {
+        return ex.getClass().getSimpleName();
     }
 }

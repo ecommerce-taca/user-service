@@ -23,6 +23,8 @@ public final class OutboxEventTestBuilder {
 
     private Map<String, Object> payload;
 
+    private UUID actorUserId;
+
     private OutboxEventTestBuilder() {
     }
 
@@ -48,6 +50,13 @@ public final class OutboxEventTestBuilder {
             String eventType
     ) {
         this.eventType = eventType;
+        return this;
+    }
+
+    public OutboxEventTestBuilder withActorUserId(
+            UUID actorUserId
+    ) {
+        this.actorUserId = actorUserId;
         return this;
     }
 

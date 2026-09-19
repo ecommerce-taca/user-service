@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -160,6 +161,7 @@ public class SubmitKycService {
         sellerOnboardingRepository.saveAndFlush(onboarding);
 
         createSubmittedEvent(
+                command.userId(),
                 shop,
                 kycCase,
                 documentTypes
@@ -215,15 +217,17 @@ public class SubmitKycService {
     }
 
     private void createSubmittedEvent(
+            UUID actorUserId,
             Shop shop,
             KycCase kycCase,
             List<String> documentTypes
     ) {
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
                         shop.getId(),
+                        actorUserId,
                         "shop.kyc.submitted",
                         EVENT_SCHEMA_VERSION,
                         shop.getId().toString(),

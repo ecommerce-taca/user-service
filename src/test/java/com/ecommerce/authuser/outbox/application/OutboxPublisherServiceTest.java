@@ -203,6 +203,206 @@ class OutboxPublisherServiceTest {
         assertThat(event.getLastErrorCode()).isEqualTo("KAFKA_PUBLISH_FAILED");
     }
 
+    @Test
+    void publishPendingBatch_shouldPublishNotificationCommandEnvelope() {
+        OutboxPublisherProperties properties = properties();
+
+        UUID userId = UUID.randomUUID();
+
+        OutboxEvent event = OutboxEvent.create(
+                OutboxAggregateType.USER,
+                userId,
+                "AUTH_VERIFICATION_REQUESTED",
+                (short) 1,
+                userId.toString(),
+                Map.of("protected", true)
+        );
+
+        Map<String, Object> plainPayload = Map.of(
+                "command_type", "AUTH_VERIFICATION_REQUESTED",
+                "user_id", userId.toString(),
+                "channel", "EMAIL",
+                "recipient", "minhanh@example.com",
+                "template", "auth-email-verification-v1",
+                "dedupe_key", "email-verification:" + userId + ":token-id",
+                "data", Map.of(
+                        "display_name", "Nguyen Minh Anh",
+                        "verification_url", "https://taca.vn/verify?t=abc",
+                        "expires_in_minutes", 1440L
+                )
+        );
+
+        when(outboxEventRepository.findPendingForUpdate(
+                any(Instant.class),
+                any(Pageable.class)
+        )).thenReturn(List.of(event));
+
+        when(outboxPayloadProtector.unprotect(
+                "AUTH_VERIFICATION_REQUESTED",
+                event.getPayloadView()
+        )).thenReturn(plainPayload);
+
+        when(outboxTopicResolver.resolveTopic(event))
+                .thenReturn("notification.commands.v1");
+
+        when(outboxTopicResolver.isNotificationCommand(
+                "AUTH_VERIFICATION_REQUESTED"
+        )).thenReturn(true);
+
+        OutboxPublisherService service = service(properties);
+
+        service.publishPendingBatch();
+
+        ArgumentCaptor<KafkaOutboxMessage> envelopeCaptor =
+                ArgumentCaptor.forClass(KafkaOutboxMessage.class);
+
+        verify(kafkaOutboxMessageProducer)
+                .publish(
+                        eq("notification.commands.v1"),
+                        envelopeCaptor.capture()
+                );
+
+        assertThat(envelopeCaptor.getValue())
+                .isInstanceOf(NotificationCommandEnvelope.class);
+
+        Map<String, Object> messageBody =
+                envelopeCaptor.getValue().toMessageBody();
+
+        assertThat(messageBody).containsEntry(
+                "command_type",
+                "AUTH_VERIFICATION_REQUESTED"
+        );
+
+        assertThat(messageBody).containsEntry(
+                "dedupe_key",
+                "email-verification:" + userId + ":token-id"
+        );
+
+        assertThat(messageBody).doesNotContainKeys(
+                "payload",
+                "event_type",
+                "aggregate_type",
+                "aggregate_id"
+        );
+    }
+
+    @Test
+    void publishPendingBatch_shouldRedactDlqPayloadWhenMaxRetriesReached() {
+        OutboxPublisherProperties properties = properties();
+        properties.setMaxRetries(1);
+
+        UUID userId = UUID.randomUUID();
+
+        OutboxEvent event = OutboxEvent.create(
+                OutboxAggregateType.USER,
+                userId,
+                "PHONE_OTP_REQUESTED",
+                (short) 1,
+                userId.toString(),
+                Map.of("protected", true)
+        );
+
+        Map<String, Object> plainPayloadWithSecret = Map.of(
+                "command_type", "PHONE_OTP_REQUESTED",
+                "user_id", userId.toString(),
+                "channel", "SMS",
+                "recipient", "+84901234567",
+                "template", "auth-phone-otp-v1",
+                "dedupe_key", "phone-otp:challenge-id",
+                "data", Map.of(
+                        "challenge_id", "challenge-id",
+                        "otp", "123456",
+                        "expires_in_minutes", 5L
+                )
+        );
+
+        when(outboxEventRepository.findPendingForUpdate(
+                any(Instant.class),
+                any(Pageable.class)
+        )).thenReturn(List.of(event));
+
+        when(outboxPayloadProtector.unprotect(
+                "PHONE_OTP_REQUESTED",
+                event.getPayloadView()
+        )).thenReturn(plainPayloadWithSecret);
+
+        when(outboxTopicResolver.resolveTopic(event))
+                .thenReturn("notification.commands.v1");
+
+        when(outboxTopicResolver.resolveDlqTopic())
+                .thenReturn("auth-user.events.dlq.v1");
+
+        when(outboxTopicResolver.isNotificationCommand(
+                "PHONE_OTP_REQUESTED"
+        )).thenReturn(true);
+
+        doThrow(new IllegalStateException(
+                "Kafka down otp=123456 reset_token=secret"
+        )).when(kafkaOutboxMessageProducer)
+                .publish(
+                        eq("notification.commands.v1"),
+                        any(KafkaOutboxMessage.class)
+                );
+
+        OutboxPublisherService service = service(properties);
+
+        service.publishPendingBatch();
+
+        ArgumentCaptor<String> topicCaptor =
+                ArgumentCaptor.forClass(String.class);
+
+        ArgumentCaptor<KafkaOutboxMessage> messageCaptor =
+                ArgumentCaptor.forClass(KafkaOutboxMessage.class);
+
+        verify(kafkaOutboxMessageProducer, times(2))
+                .publish(
+                        topicCaptor.capture(),
+                        messageCaptor.capture()
+                );
+
+        assertThat(topicCaptor.getAllValues())
+                .containsExactly(
+                        "notification.commands.v1",
+                        "auth-user.events.dlq.v1"
+                );
+
+        KafkaOutboxMessage dlqMessage =
+                messageCaptor.getAllValues().get(1);
+
+        assertThat(dlqMessage)
+                .isInstanceOf(OutboxMessageEnvelope.class);
+
+        Map<String, Object> dlqBody =
+                dlqMessage.toMessageBody();
+
+        assertThat(dlqBody)
+                .containsKey("payload");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> dlqPayload =
+                (Map<String, Object>) dlqBody.get("payload");
+
+        assertThat(dlqPayload)
+                .containsEntry("original_event_type", "PHONE_OTP_REQUESTED");
+
+        assertThat(dlqPayload)
+                .containsEntry("original_payload_redacted", true);
+
+        assertThat(dlqPayload)
+                .containsEntry("failure_code", "KAFKA_PUBLISH_FAILED");
+
+        assertThat(dlqPayload)
+                .containsEntry("failure_message", "IllegalStateException");
+
+        assertThat(dlqPayload)
+                .doesNotContainKeys("original_payload");
+
+        assertThat(dlqPayload.toString())
+                .doesNotContain("123456")
+                .doesNotContain("reset_token")
+                .doesNotContain("secret");
+    }
+
     private OutboxPublisherService service(OutboxPublisherProperties properties) {
         return new OutboxPublisherService(
                 outboxEventRepository,
