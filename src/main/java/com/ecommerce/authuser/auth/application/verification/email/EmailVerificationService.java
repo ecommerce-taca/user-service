@@ -100,7 +100,7 @@ public class EmailVerificationService {
                                 Map.of(
                                         "user_id", user.getId().toString(),
 
-                                        "email_verified_at", now.toString()
+                                        "verified_at", now.toString()
                                 )
                         )
                 );
