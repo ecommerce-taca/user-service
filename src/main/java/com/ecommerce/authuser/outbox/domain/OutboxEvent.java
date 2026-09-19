@@ -46,6 +46,13 @@ public class OutboxEvent {
     private UUID aggregateId;
 
     @Column(
+            name = "actor_user_id",
+            updatable = false,
+            columnDefinition = "BINARY(16)"
+    )
+    private UUID actorUserId;
+
+    @Column(
             name = "event_type",
             nullable = false,
             length = 64,
@@ -116,6 +123,26 @@ public class OutboxEvent {
             String partitionKey,
             Map<String, Object> payload
     ) {
+        return createWithActor(
+                aggregateType,
+                aggregateId,
+                null,
+                eventType,
+                schemaVersion,
+                partitionKey,
+                payload
+        );
+    }
+
+    public static OutboxEvent createWithActor(
+            OutboxAggregateType aggregateType,
+            UUID aggregateId,
+            UUID actorUserId,
+            String eventType,
+            short schemaVersion,
+            String partitionKey,
+            Map<String, Object> payload
+    ) {
         if (aggregateType == null) {
             throw new IllegalArgumentException(
                     "aggregateType must not be null"
@@ -163,6 +190,7 @@ public class OutboxEvent {
         event.id = UuidV7Generator.generate();
         event.aggregateType = aggregateType;
         event.aggregateId = aggregateId;
+        event.actorUserId = actorUserId;
         event.eventType = eventType;
         event.schemaVersion = schemaVersion;
         event.partitionKey = partitionKey;

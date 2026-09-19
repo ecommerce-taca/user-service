@@ -41,6 +41,7 @@ class OutboxMessageEnvelopeTest {
         assertThat(envelope.schemaVersion()).isEqualTo((short) 1);
         assertThat(envelope.aggregateType()).isEqualTo(OutboxAggregateType.USER);
         assertThat(envelope.aggregateId()).isEqualTo(userId);
+        assertThat(envelope.actorUserId()).isNull();
         assertThat(envelope.partitionKey()).isEqualTo(userId.toString());
         assertThat(envelope.payload()).containsEntry("status", "ACTIVE");
     }
@@ -71,15 +72,17 @@ class OutboxMessageEnvelopeTest {
                 "event_id",
                 "event_type",
                 "schema_version",
+                "occurred_at",
                 "aggregate_type",
                 "aggregate_id",
-                "partition_key",
-                "occurred_at",
+                "actor_user_id",
                 "payload"
         );
 
         assertThat(body).containsEntry("event_type", "user.created");
         assertThat(body).containsEntry("aggregate_type", "USER");
+        assertThat(body).containsEntry("actor_user_id", null);
+        assertThat(body).doesNotContainKey("partition_key");
     }
 
     @Test
@@ -107,5 +110,37 @@ class OutboxMessageEnvelopeTest {
                 event,
                 null
         )).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void toMessageBody_shouldIncludeActorUserIdWhenPresent() {
+        UUID userId = UUID.randomUUID();
+        UUID actorUserId = UUID.randomUUID();
+
+        OutboxEvent event = OutboxEvent.createWithActor(
+                OutboxAggregateType.USER,
+                userId,
+                actorUserId,
+                "user.status_changed",
+                (short) 1,
+                userId.toString(),
+                Map.of("user_id", userId.toString())
+        );
+
+        OutboxMessageEnvelope envelope = OutboxMessageEnvelope.from(
+                event,
+                Map.of("user_id", userId.toString())
+        );
+
+        Map<String, Object> body = envelope.toMessageBody();
+
+        assertThat(envelope.actorUserId())
+                .isEqualTo(actorUserId);
+
+        assertThat(body)
+                .containsEntry(
+                        "actor_user_id",
+                        actorUserId.toString()
+                );
     }
 }
