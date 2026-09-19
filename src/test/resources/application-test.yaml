@@ -24,6 +24,11 @@ auth:
   outbox:
     encryption-key-base64: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
+  notification-links:
+    public-base-url: "https://taca.vn"
+    email-verification-path: "/verify"
+    password-reset-path: "/reset-password"
+
   otp:
     hash-key-base64: "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
 

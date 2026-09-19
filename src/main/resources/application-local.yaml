@@ -53,6 +53,11 @@ auth:
   outbox:
     encryption-key-base64: ${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}
 
+  notification-links:
+    public-base-url: ${AUTH_PUBLIC_BASE_URL:https://taca.vn}
+    email-verification-path: ${AUTH_EMAIL_VERIFICATION_PATH:/verify}
+    password-reset-path: ${AUTH_PASSWORD_RESET_PATH:/reset-password}
+
   audit:
     hash-key-base64: ${AUTH_AUDIT_HASH_KEY_BASE64}
 

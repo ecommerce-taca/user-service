@@ -10,6 +10,7 @@ import com.ecommerce.authuser.auth.exception.verification.email.VerificationAlre
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 
+import com.ecommerce.authuser.outbox.application.NotificationLinkFactory;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -59,6 +60,8 @@ public class EmailVerificationResendService {
     private final OutboxEventRepository outboxEventRepository;
 
     private final OutboxPayloadProtector outboxPayloadProtector;
+
+    private final NotificationLinkFactory notificationLinkFactory;
 
     private final AuditLogRepository auditLogRepository;
 
@@ -151,14 +154,21 @@ public class EmailVerificationResendService {
                                         "recipient",
                                         user.getEmail(),
 
-                                        "display_name",
-                                        user.getFullName(),
+                                        "template",
+                                        "auth-email-verification-v1",
 
-                                        "verification_token",
-                                        rawVerificationToken,
+                                        "dedupe_key",
+                                        "email-verification:"
+                                                + user.getId()
+                                                + ":"
+                                                + newToken.getId(),
 
-                                        "expires_at",
-                                        expiresAt.toString()
+                                        "data",
+                                        notificationLinkFactory.emailVerificationData(
+                                                user.getFullName(),
+                                                rawVerificationToken,
+                                                EMAIL_VERIFICATION_TTL
+                                        )
                                 )
                         )
                 );
