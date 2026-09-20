@@ -128,6 +128,26 @@ public class KycCase {
         reviewedAt = null;
 
         decisionReason = null;
+
+        expiresAt = null;
+    }
+
+    public void submit(
+            Instant now,
+            Instant expiresAt
+    ) {
+        Objects.requireNonNull(now);
+        Objects.requireNonNull(expiresAt);
+
+        if (!expiresAt.isAfter(now)) {
+            throw new IllegalArgumentException(
+                    "expiresAt must be after now"
+            );
+        }
+
+        submit(now);
+
+        this.expiresAt = expiresAt;
     }
 
     public void review(
