@@ -2,6 +2,7 @@ package com.ecommerce.authuser.integration.auth;
 
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;
+import com.ecommerce.authuser.outbox.security.OutboxPayloadProtector;
 import com.ecommerce.authuser.support.base.BaseIntegrationTest;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
@@ -48,6 +49,9 @@ class EmailVerificationIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private OutboxEventRepository outboxEventRepository;
+
+    @Autowired
+    private OutboxPayloadProtector outboxPayloadProtector;
 
     @Test
     void verifyEmail_shouldVerifyUserAndCreateOutboxEvent() throws Exception {
@@ -124,6 +128,9 @@ class EmailVerificationIntegrationTest extends BaseIntegrationTest {
         assertThat(verificationEvent.getAggregateId())
                 .isEqualTo(user.getId());
 
+        assertThat(verificationEvent.getActorUserId())
+                .isNull();
+
         assertThat(verificationEvent.getSchemaVersion())
                 .isEqualTo((short) 1);
 
@@ -156,6 +163,27 @@ class EmailVerificationIntegrationTest extends BaseIntegrationTest {
         assertThat(payload.get("ciphertext"))
                 .isInstanceOf(String.class)
                 .isNotNull();
+
+        Map<String, Object> plainPayload =
+                outboxPayloadProtector.unprotect(
+                        "user.email_verified",
+                        verificationEvent.getPayloadView()
+                );
+
+        assertThat(plainPayload)
+                .containsEntry(
+                        "user_id",
+                        user.getId().toString()
+                );
+
+        assertThat(plainPayload)
+                .containsKey("verified_at");
+
+        assertThat(plainPayload)
+                .doesNotContainKey("email_verified_at");
+
+        assertThat(String.valueOf(plainPayload.get("verified_at")))
+                .isNotBlank();
     }
 
     @Test
