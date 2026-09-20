@@ -19,18 +19,20 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class KafkaOutboxMessageProducer {
 
-    private static final Duration SEND_TIMEOUT = Duration.ofSeconds(10);
-
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper;
 
+    private final OutboxPublisherProperties properties;
+
     public KafkaOutboxMessageProducer(
             KafkaTemplate<String, String> kafkaTemplate,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            OutboxPublisherProperties properties
     ) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
+        this.properties = properties;
     }
 
     public void publish(
@@ -59,7 +61,7 @@ public class KafkaOutboxMessageProducer {
 
             kafkaTemplate
                     .send(record)
-                    .get(SEND_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+                    .get(properties.getSendTimeoutMs(), TimeUnit.MILLISECONDS);
 
         } catch (JacksonException ex) {
             throw new IllegalStateException(

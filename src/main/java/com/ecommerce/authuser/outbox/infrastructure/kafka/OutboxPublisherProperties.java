@@ -28,6 +28,18 @@ public class OutboxPublisherProperties {
     @Min(1)
     private long retryBackoffSeconds = 2;
 
+    @Min(1000)
+    @Max(300000)
+    private long sendTimeoutMs = 35000;
+
+    public long getSendTimeoutMs() {
+        return sendTimeoutMs;
+    }
+
+    public void setSendTimeoutMs(long sendTimeoutMs) {
+        this.sendTimeoutMs = sendTimeoutMs;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }

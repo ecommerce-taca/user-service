@@ -89,6 +89,7 @@ auth:
     fixed-delay-ms: 2000
     max-retries: 3
     retry-backoff-seconds: 2
+    send-timeout-ms: ${AUTH_OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:35000}
 
   kafka:
     topics:
