@@ -103,6 +103,13 @@ class UpdateSellerShopIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.data.description")
                         .value("New description"));
 
+        Shop updatedShop = shopRepository
+                .findById(shop.getId())
+                .orElseThrow();
+
+        assertThat(updatedShop.getVersion())
+                .isGreaterThanOrEqualTo(1L);
+
         List<OutboxEvent> events = outboxEventRepository
                 .findAllByAggregateTypeAndAggregateIdOrderByCreatedAtAsc(
                         OutboxAggregateType.SHOP,
@@ -183,10 +190,10 @@ class UpdateSellerShopIntegrationTest extends BaseIntegrationTest {
         assertThat(String.valueOf(plainPayload.get("updated_at")))
                 .isNotBlank();
 
-        assertThat(plainPayload)
-                .containsKey("version");
-
         assertThat(plainPayload.get("version"))
                 .isInstanceOf(Number.class);
+
+        assertThat(((Number) plainPayload.get("version")).longValue())
+                .isEqualTo(updatedShop.getVersion());
     }
 }

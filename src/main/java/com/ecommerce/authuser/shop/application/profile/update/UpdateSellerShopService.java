@@ -234,8 +234,8 @@ public class UpdateSellerShopService {
         payload.put("changed_fields", List.copyOf(changedFields));
         payload.put("snapshot", snapshot);
         payload.put("updated_at", shop.getUpdatedAt().toString());
-        payload.put("version", 1);
-
+        payload.put("version", shop.getVersion());
+        
         OutboxEvent event =
                 OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
