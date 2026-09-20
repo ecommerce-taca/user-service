@@ -7,6 +7,7 @@ import com.ecommerce.authuser.outbox.infrastructure.kafka.KafkaOutboxMessageProd
 import com.ecommerce.authuser.outbox.infrastructure.kafka.OutboxPublisherProperties;
 import com.ecommerce.authuser.outbox.security.OutboxPayloadProtector;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ class OutboxPublisherServiceTest {
     private final OutboxPayloadProtector outboxPayloadProtector = mock(OutboxPayloadProtector.class);
     private final OutboxTopicResolver outboxTopicResolver = mock(OutboxTopicResolver.class);
     private final KafkaOutboxMessageProducer kafkaOutboxMessageProducer = mock(KafkaOutboxMessageProducer.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
 
     @Test
     void publishPendingBatch_shouldPublishAndMarkEventAsPublished() {
@@ -68,6 +70,12 @@ class OutboxPublisherServiceTest {
 
         assertThat(envelopeCaptor.getValue().eventId()).isEqualTo(event.getId());
         assertThat(envelopeCaptor.getValue().payload()).isEqualTo(plainPayload);
+        assertThat(meterRegistry.counter(
+                "auth.outbox.publish.total",
+                "event_type", "user.created",
+                "topic", "user.events.v1",
+                "result", "success"
+        ).count()).isEqualTo(1.0);
     }
 
     @Test
@@ -106,6 +114,12 @@ class OutboxPublisherServiceTest {
         assertThat(event.getAttemptCount()).isEqualTo((byte) 1);
         assertThat(event.getNextRetryAt()).isNotNull();
         assertThat(event.getLastErrorCode()).isEqualTo("KAFKA_PUBLISH_FAILED");
+        assertThat(meterRegistry.counter(
+                "auth.outbox.publish.total",
+                "event_type", "user.created",
+                "topic", "user.events.v1",
+                "result", "retry"
+        ).count()).isEqualTo(1.0);
     }
 
     @Test
@@ -201,6 +215,18 @@ class OutboxPublisherServiceTest {
 
         assertThat(event.getFailedAt()).isNotNull();
         assertThat(event.getLastErrorCode()).isEqualTo("KAFKA_PUBLISH_FAILED");
+        assertThat(meterRegistry.counter(
+                "auth.outbox.publish.total",
+                "event_type", "user.created",
+                "topic", "user.events.v1",
+                "result", "failed"
+        ).count()).isEqualTo(1.0);
+
+        assertThat(meterRegistry.counter(
+                "auth.outbox.dlq.publish.total",
+                "event_type", "user.created",
+                "topic", "auth-user.events.dlq.v1"
+        ).count()).isEqualTo(1.0);
     }
 
     @Test
@@ -409,7 +435,8 @@ class OutboxPublisherServiceTest {
                 outboxPayloadProtector,
                 outboxTopicResolver,
                 kafkaOutboxMessageProducer,
-                properties
+                properties,
+                meterRegistry
         );
     }
 
