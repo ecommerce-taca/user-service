@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -210,5 +212,88 @@ class UpdateMyProfileIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.phone")
                         .value("+14155552671"));
+    }
+
+    @Test
+    void updateMyProfile_shouldRejectDateOfBirthWhenUserIsYoungerThanFourteen() throws Exception {
+        User user = UserTestBuilder
+                .aUser()
+                .withEmail("profile-underage@test.com")
+                .withEmailNormalized("profile-underage@test.com")
+                .withFullName("Old Name")
+                .withPhone(null)
+                .build();
+
+        user = userRepository.saveAndFlush(user);
+
+        TestUserToken token = TestJwtFactory.createUserToken(
+                user.getId(),
+                List.of("BUYER")
+        );
+
+        LocalDate dateOfBirth =
+                LocalDate.now(ZoneOffset.UTC)
+                        .minusYears(14)
+                        .plusDays(1);
+
+        mockMvc.perform(
+                        put("/api/v1/users/me")
+                                .header(
+                                        "Authorization",
+                                        "Bearer " + token.value()
+                                )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                                {
+                                                    "full_name": "New Name",
+                                                    "date_of_birth": "%s"
+                                                }
+                                                """.formatted(dateOfBirth)
+                                ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code")
+                        .value("PROFILE_INVALID"));
+    }
+
+    @Test
+    void updateMyProfile_shouldAllowDateOfBirthWhenUserIsExactlyFourteen() throws Exception {
+        User user = UserTestBuilder
+                .aUser()
+                .withEmail("profile-fourteen@test.com")
+                .withEmailNormalized("profile-fourteen@test.com")
+                .withFullName("Old Name")
+                .withPhone(null)
+                .build();
+
+        user = userRepository.saveAndFlush(user);
+
+        TestUserToken token = TestJwtFactory.createUserToken(
+                user.getId(),
+                List.of("BUYER")
+        );
+
+        LocalDate dateOfBirth =
+                LocalDate.now(ZoneOffset.UTC)
+                        .minusYears(14);
+
+        mockMvc.perform(
+                        put("/api/v1/users/me")
+                                .header(
+                                        "Authorization",
+                                        "Bearer " + token.value()
+                                )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                                {
+                                                    "full_name": "New Name",
+                                                    "date_of_birth": "%s"
+                                                }
+                                                """.formatted(dateOfBirth)
+                                ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.date_of_birth")
+                        .value(dateOfBirth.toString()));
     }
 }
