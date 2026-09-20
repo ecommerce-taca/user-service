@@ -69,6 +69,10 @@ public class Shop {
     @Column(name = "kyc_status", nullable = false, length = 16)
     private KycStatus kycStatus;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Getter(AccessLevel.NONE)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "warehouse_snapshot", columnDefinition = "JSON")
