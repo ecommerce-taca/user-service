@@ -33,7 +33,8 @@ class KafkaOutboxMessageProducerTest {
 
         KafkaOutboxMessageProducer producer = new KafkaOutboxMessageProducer(
                 kafkaTemplate,
-                new ObjectMapper()
+                new ObjectMapper(),
+                properties()
         );
 
         UUID userId = UUID.randomUUID();
@@ -84,9 +85,12 @@ class KafkaOutboxMessageProducerTest {
 
     @Test
     void publish_shouldRejectBlankTopic() {
+        KafkaTemplate<String, String> kafkaTemplate = mock(KafkaTemplate.class);
+        
         KafkaOutboxMessageProducer producer = new KafkaOutboxMessageProducer(
-                mock(KafkaTemplate.class),
-                new ObjectMapper()
+                kafkaTemplate,
+                new ObjectMapper(),
+                properties()
         );
 
         assertThatThrownBy(() -> producer.publish(" ", mockEnvelope()))
@@ -95,13 +99,37 @@ class KafkaOutboxMessageProducerTest {
 
     @Test
     void publish_shouldRejectNullEnvelope() {
+        KafkaTemplate<String, String> kafkaTemplate = mock(KafkaTemplate.class);
+
         KafkaOutboxMessageProducer producer = new KafkaOutboxMessageProducer(
-                mock(KafkaTemplate.class),
-                new ObjectMapper()
+                kafkaTemplate,
+                new ObjectMapper(),
+                properties()
         );
 
         assertThatThrownBy(() -> producer.publish("user.events.v1", null))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void publish_shouldFailWhenKafkaSendTimeoutIsReached() {
+        KafkaTemplate<String, String> kafkaTemplate = mock(KafkaTemplate.class);
+
+        when(kafkaTemplate.send(any(ProducerRecord.class)))
+                .thenReturn(new CompletableFuture<>());
+
+        OutboxPublisherProperties properties = new OutboxPublisherProperties();
+        properties.setSendTimeoutMs(1);
+
+        KafkaOutboxMessageProducer producer = new KafkaOutboxMessageProducer(
+                kafkaTemplate,
+                new ObjectMapper(),
+                properties
+        );
+
+        assertThatThrownBy(() -> producer.publish("user.events.v1", mockEnvelope()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Kafka publish failed");
     }
 
     private static String headerValue(
@@ -112,6 +140,12 @@ class KafkaOutboxMessageProducerTest {
                 record.headers().lastHeader(name).value(),
                 StandardCharsets.UTF_8
         );
+    }
+
+    private static OutboxPublisherProperties properties() {
+        OutboxPublisherProperties properties = new OutboxPublisherProperties();
+        properties.setSendTimeoutMs(35000);
+        return properties;
     }
 
     private static OutboxMessageEnvelope mockEnvelope() {
