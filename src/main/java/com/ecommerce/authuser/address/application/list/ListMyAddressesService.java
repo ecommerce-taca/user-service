@@ -152,9 +152,12 @@ public class ListMyAddressesService {
                 address.getPhone(),
                 address.getLine1(),
                 address.getLine2(),
+                address.getCountryCode(),
+                address.getProvinceCode(),
+                address.getProvince(),
+                address.getWardCode(),
                 address.getWard(),
                 address.getDistrict(),
-                address.getProvince(),
                 address.getPostalCode(),
                 Boolean.TRUE.equals(
                         address.getDefaultAddress()

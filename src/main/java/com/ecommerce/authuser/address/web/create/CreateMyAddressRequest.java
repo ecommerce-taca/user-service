@@ -18,11 +18,11 @@ public class CreateMyAddressRequest {
 
     private String line2;
 
-    private String ward;
+    private String countryCode;
 
-    private String district;
+    private String provinceCode;
 
-    private String province;
+    private String wardCode;
 
     private String postalCode;
 
@@ -53,19 +53,19 @@ public class CreateMyAddressRequest {
         line2 = readOptionalString(value);
     }
 
-    @JsonSetter("ward")
-    public void setWard(JsonNode value) {
-        ward = readRequiredString(value);
+    @JsonSetter("country_code")
+    public void setCountryCode(JsonNode value) {
+        countryCode = readRequiredString(value);
     }
 
-    @JsonSetter("district")
-    public void setDistrict(JsonNode value) {
-        district = readRequiredString(value);
+    @JsonSetter("province_code")
+    public void setProvinceCode(JsonNode value) {
+        provinceCode = readRequiredString(value);
     }
 
-    @JsonSetter("province")
-    public void setProvince(JsonNode value) {
-        province = readRequiredString(value);
+    @JsonSetter("ward_code")
+    public void setWardCode(JsonNode value) {
+        wardCode = readRequiredString(value);
     }
 
     @JsonSetter("postal_code")
@@ -112,16 +112,16 @@ public class CreateMyAddressRequest {
         return line2;
     }
 
-    public String ward() {
-        return ward;
+    public String countryCode() {
+        return countryCode;
     }
 
-    public String district() {
-        return district;
+    public String provinceCode() {
+        return provinceCode;
     }
 
-    public String province() {
-        return province;
+    public String wardCode() {
+        return wardCode;
     }
 
     public String postalCode() {

@@ -21,11 +21,20 @@ public record CreateMyAddressResponse(
 
             String line2,
 
+            @JsonProperty("country_code")
+            String countryCode,
+
+            @JsonProperty("province_code")
+            String provinceCode,
+
+            String province,
+
+            @JsonProperty("ward_code")
+            String wardCode,
+
             String ward,
 
             String district,
-
-            String province,
 
             @JsonProperty("postal_code")
             String postalCode,
