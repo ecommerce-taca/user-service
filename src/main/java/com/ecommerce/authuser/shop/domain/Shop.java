@@ -339,6 +339,11 @@ public class Shop {
         }
 
         this.kycStatus = decision;
+
+        if (decision == KycStatus.APPROVED
+                && status == ShopStatus.DRAFT) {
+            status = ShopStatus.ACTIVE;
+        }
     }
 
     @PrePersist
