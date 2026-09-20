@@ -8,9 +8,9 @@ public record CreateMyAddressCommand(
         String phone,
         String line1,
         String line2,
-        String ward,
-        String district,
-        String province,
+        String countryCode,
+        String provinceCode,
+        String wardCode,
         String postalCode,
         boolean defaultRequested
 ) {

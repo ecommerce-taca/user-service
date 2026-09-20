@@ -8,6 +8,8 @@ import com.ecommerce.authuser.address.repository.AddressRepository;
 import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
 import com.ecommerce.authuser.auth.exception.verification.phone.InvalidPhoneFormatException;
 
+import com.ecommerce.authuser.location.application.VietnamLocationCatalog;
+
 import com.ecommerce.authuser.user.domain.User;
 import com.ecommerce.authuser.user.exception.profile.UserNotFoundException;
 import com.ecommerce.authuser.user.repository.UserRepository;
@@ -31,6 +33,8 @@ public class CreateMyAddressService {
 
     private final IdentityNormalizer identityNormalizer;
 
+    private final VietnamLocationCatalog locationCatalog;
+
     @Transactional
     public CreateMyAddressResult create(CreateMyAddressCommand command) {
 
@@ -50,11 +54,12 @@ public class CreateMyAddressService {
 
         String line2 = optionalText(command.line2(), 255);
 
-        String ward = requiredText(command.ward(), 120);
-
-        String district = requiredText(command.district(), 120);
-
-        String province = requiredText(command.province(), 120);
+        VietnamLocationCatalog.ResolvedLocation location =
+                locationCatalog.resolve(
+                        command.countryCode(),
+                        command.provinceCode(),
+                        command.wardCode()
+                );
 
         String postalCode = optionalText(command.postalCode(), 12);
 
@@ -90,9 +95,12 @@ public class CreateMyAddressService {
                         phone,
                         line1,
                         line2,
-                        ward,
-                        district,
-                        province,
+                        location.countryCode(),
+                        location.provinceCode(),
+                        location.provinceName(),
+                        location.wardCode(),
+                        location.wardName(),
+                        null,
                         postalCode,
                         shouldBeDefault
                 );
@@ -107,9 +115,12 @@ public class CreateMyAddressService {
                 address.getPhone(),
                 address.getLine1(),
                 address.getLine2(),
+                address.getCountryCode(),
+                address.getProvinceCode(),
+                address.getProvince(),
+                address.getWardCode(),
                 address.getWard(),
                 address.getDistrict(),
-                address.getProvince(),
                 address.getPostalCode(),
                 Boolean.TRUE.equals(address.getDefaultAddress()),
                 address.getCreatedAt(),

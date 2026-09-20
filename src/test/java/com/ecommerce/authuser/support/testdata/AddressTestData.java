@@ -6,7 +6,7 @@ public final class AddressTestData {
             "Nguyen Van A";
 
     public static final String PHONE =
-            "0901234567";
+            "+84901234567";
 
     public static final String LINE1 =
             "123 Nguyen Hue";
@@ -14,14 +14,23 @@ public final class AddressTestData {
     public static final String LINE2 =
             "Can ho 10.01";
 
+    public static final String COUNTRY_CODE =
+            "VN";
+
+    public static final String PROVINCE_CODE =
+            "79";
+
+    public static final String WARD_CODE =
+            "26740";
+
     public static final String WARD =
-            "Ben Nghe";
+            "Phuong Sai Gon";
 
     public static final String DISTRICT =
             "District 1";
 
     public static final String PROVINCE =
-            "Ho Chi Minh City";
+            "Thanh pho Ho Chi Minh";
 
     public static final String POSTAL_CODE =
             "700000";
