@@ -346,6 +346,23 @@ public class Shop {
         }
     }
 
+    public void expireKyc() {
+        if (status == ShopStatus.SUSPENDED
+                || status == ShopStatus.DELETED) {
+            throw new IllegalStateException(
+                    "Shop cannot expire KYC"
+            );
+        }
+
+        if (kycStatus != KycStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING shop KYC can expire"
+            );
+        }
+
+        kycStatus = KycStatus.EXPIRED;
+    }
+
     @PrePersist
     private void prePersist() {
         Instant now = Instant.now();

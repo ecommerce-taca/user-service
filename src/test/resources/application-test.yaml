@@ -24,6 +24,11 @@ auth:
   outbox:
     encryption-key-base64: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
+  kyc-expiry:
+    enabled: false
+    batch-size: 50
+    fixed-delay-ms: 60000
+
   notification-links:
     public-base-url: "https://taca.vn"
     email-verification-path: "/verify"

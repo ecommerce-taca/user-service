@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -123,5 +124,21 @@ public interface KycCaseRepository extends JpaRepository<KycCase, UUID> {
         """)
     Optional<KycCase> findCurrentByShopIdForUpdate(
             @Param("shopId") UUID shopId
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select k
+        from KycCase k
+        join fetch k.shop shop
+        where k.status = com.ecommerce.authuser.shop.domain.KycStatus.PENDING
+            and k.expiresAt is not null
+            and k.expiresAt <= :now
+            and shop.deletedAt is null
+        order by k.expiresAt asc
+        """)
+    List<KycCase> findExpiredPendingForUpdate(
+            @Param("now") Instant now,
+            Pageable pageable
     );
 }

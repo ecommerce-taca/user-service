@@ -110,4 +110,8 @@ public interface KycDocumentRepository extends JpaRepository<KycDocument, UUID> 
             @Param("documentId") UUID documentId,
             @Param("kycCaseId") UUID kycCaseId
     );
+
+    List<KycDocument> findAllByKycCase_IdAndDeletedAtIsNull(
+            UUID kycCaseId
+    );
 }
