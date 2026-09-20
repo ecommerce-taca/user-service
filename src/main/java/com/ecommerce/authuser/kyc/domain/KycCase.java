@@ -163,6 +163,30 @@ public class KycCase {
         this.decisionReason = normalizedReason;
     }
 
+    public void expire(Instant now) {
+        Objects.requireNonNull(now);
+
+        if (status != KycStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING KYC case can expire"
+            );
+        }
+
+        if (expiresAt == null || expiresAt.isAfter(now)) {
+            throw new IllegalStateException(
+                    "KYC case is not expired"
+            );
+        }
+
+        status = KycStatus.EXPIRED;
+
+        reviewedBy = null;
+
+        reviewedAt = null;
+
+        decisionReason = "KYC_EXPIRED";
+    }
+
     private String normalizeDecisionReason(
             KycStatus decision,
             String reason
