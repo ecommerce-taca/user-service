@@ -16,6 +16,26 @@ public class OutboxTopicResolver {
             "PHONE_OTP_REQUESTED"
     );
 
+    public static final Set<String> USER_EVENT_TYPES = Set.of(
+            "user.created",
+            "user.email_verified",
+            "user.password_changed",
+            "user.role_changed",
+            "user.status_changed",
+            "user.updated"
+    );
+
+    public static final Set<String> SHOP_EVENT_TYPES = Set.of(
+            "shop.created",
+            "shop.updated",
+            "shop.status_changed",
+            "shop.kyc.submitted",
+            "shop.kyc.approved",
+            "shop.kyc.rejected",
+            "shop.kyc.needs_info",
+            "shop.kyc.expired"
+    );
+
     private final KafkaTopicProperties topics;
 
     public OutboxTopicResolver(KafkaTopicProperties topics) {
@@ -39,11 +59,11 @@ public class OutboxTopicResolver {
             return topics.getNotificationCommands();
         }
 
-        if (eventType.startsWith("user.")) {
+        if (USER_EVENT_TYPES.contains(eventType)) {
             return topics.getUserEvents();
         }
 
-        if (eventType.startsWith("shop.")) {
+        if (SHOP_EVENT_TYPES.contains(eventType)) {
             return topics.getShopEvents();
         }
 
