@@ -57,6 +57,8 @@ public class SubmitKycService {
 
     private final OutboxEventRepository outboxEventRepository;
 
+    private final KycSubmissionProperties properties;
+
     @Transactional
     public SubmitKycResult submit(SubmitKycCommand command) {
         if (command == null || command.userId() == null) {
@@ -143,7 +145,14 @@ public class SubmitKycService {
 
         Instant now = Instant.now();
 
-        kycCase.submit(now);
+        Instant expiresAt = now.plus(
+                properties.expiryTtl()
+        );
+
+        kycCase.submit(
+                now,
+                expiresAt
+        );
 
         try {
             shop.markKycPending();
@@ -237,7 +246,9 @@ public class SubmitKycService {
                                 "kyc_case_id",
                                 kycCase.getId().toString(),
                                 "document_types",
-                                documentTypes
+                                documentTypes,
+                                "expires_at",
+                                kycCase.getExpiresAt().toString()
                         )
                 );
 

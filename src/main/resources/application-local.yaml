@@ -58,6 +58,9 @@ auth:
     batch-size: ${AUTH_KYC_EXPIRY_BATCH_SIZE:50}
     fixed-delay-ms: ${AUTH_KYC_EXPIRY_FIXED_DELAY_MS:60000}
 
+  kyc-submission:
+    expiry-days: ${AUTH_KYC_SUBMISSION_EXPIRY_DAYS:30}
+
   notification-links:
     public-base-url: ${AUTH_PUBLIC_BASE_URL:https://taca.vn}
     email-verification-path: ${AUTH_EMAIL_VERIFICATION_PATH:/verify}
