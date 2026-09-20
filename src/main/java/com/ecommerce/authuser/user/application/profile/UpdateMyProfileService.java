@@ -31,6 +31,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UpdateMyProfileService {
 
+    private static final int MINIMUM_PROFILE_AGE_YEARS = 14;
+
     private final UserRepository userRepository;
 
     private final IdentityNormalizer identityNormalizer;
@@ -207,6 +209,13 @@ public class UpdateMyProfileService {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
 
         if (dateOfBirth.isAfter(today)) {
+            throw new ProfileInvalidException();
+        }
+
+        LocalDate minimumAllowedBirthDate =
+                today.minusYears(MINIMUM_PROFILE_AGE_YEARS);
+
+        if (dateOfBirth.isAfter(minimumAllowedBirthDate)) {
             throw new ProfileInvalidException();
         }
     }
