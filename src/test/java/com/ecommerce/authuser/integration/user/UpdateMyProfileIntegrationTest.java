@@ -137,4 +137,78 @@ class UpdateMyProfileIntegrationTest extends BaseIntegrationTest {
         assertThat(String.valueOf(plainPayload.get("updated_at")))
                 .isNotBlank();
     }
+
+    @Test
+    void updateMyProfile_shouldRejectShortVietnamesePhone() throws Exception {
+        User user = UserTestBuilder
+                .aUser()
+                .withEmail("profile-phone-invalid@test.com")
+                .withEmailNormalized("profile-phone-invalid@test.com")
+                .withFullName("Old Name")
+                .withPhone(null)
+                .build();
+
+        user = userRepository.saveAndFlush(user);
+
+        TestUserToken token = TestJwtFactory.createUserToken(
+                user.getId(),
+                List.of("BUYER")
+        );
+
+        mockMvc.perform(
+                        put("/api/v1/users/me")
+                                .header(
+                                        "Authorization",
+                                        "Bearer " + token.value()
+                                )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                                {
+                                                    "full_name": "New Name",
+                                                    "phone": "+8434439845"
+                                                }
+                                                """
+                                ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code")
+                        .value("PROFILE_INVALID"));
+    }
+
+    @Test
+    void updateMyProfile_shouldAllowNonVietnameseE164Phone() throws Exception {
+        User user = UserTestBuilder
+                .aUser()
+                .withEmail("profile-phone-international@test.com")
+                .withEmailNormalized("profile-phone-international@test.com")
+                .withFullName("Old Name")
+                .withPhone(null)
+                .build();
+
+        user = userRepository.saveAndFlush(user);
+
+        TestUserToken token = TestJwtFactory.createUserToken(
+                user.getId(),
+                List.of("BUYER")
+        );
+
+        mockMvc.perform(
+                        put("/api/v1/users/me")
+                                .header(
+                                        "Authorization",
+                                        "Bearer " + token.value()
+                                )
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
+                                                {
+                                                    "full_name": "New Name",
+                                                    "phone": "+14155552671"
+                                                }
+                                                """
+                                ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.phone")
+                        .value("+14155552671"));
+    }
 }
