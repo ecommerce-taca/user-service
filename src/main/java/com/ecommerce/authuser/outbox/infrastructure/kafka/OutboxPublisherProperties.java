@@ -32,6 +32,39 @@ public class OutboxPublisherProperties {
     @Max(300000)
     private long sendTimeoutMs = 35000;
 
+    @Min(1)
+    private long maxPendingEvents = 1000;
+
+    @Min(1)
+    private long maxOldestPendingAgeSeconds = 300;
+
+    @Min(0)
+    private long maxFailedEvents = 0;
+
+    public long getMaxPendingEvents() {
+        return maxPendingEvents;
+    }
+
+    public void setMaxPendingEvents(long maxPendingEvents) {
+        this.maxPendingEvents = maxPendingEvents;
+    }
+
+    public long getMaxOldestPendingAgeSeconds() {
+        return maxOldestPendingAgeSeconds;
+    }
+
+    public void setMaxOldestPendingAgeSeconds(long maxOldestPendingAgeSeconds) {
+        this.maxOldestPendingAgeSeconds = maxOldestPendingAgeSeconds;
+    }
+
+    public long getMaxFailedEvents() {
+        return maxFailedEvents;
+    }
+
+    public void setMaxFailedEvents(long maxFailedEvents) {
+        this.maxFailedEvents = maxFailedEvents;
+    }
+
     public long getSendTimeoutMs() {
         return sendTimeoutMs;
     }

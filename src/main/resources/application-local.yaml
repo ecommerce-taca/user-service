@@ -91,6 +91,17 @@ auth:
     retry-backoff-seconds: 2
     send-timeout-ms: ${AUTH_OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:35000}
 
+    max-pending-events: ${AUTH_OUTBOX_MAX_PENDING_EVENTS:1000}
+    max-oldest-pending-age-seconds: ${AUTH_OUTBOX_MAX_OLDEST_PENDING_AGE_SECONDS:300}
+    max-failed-events: ${AUTH_OUTBOX_MAX_FAILED_EVENTS:0}
+
+  outbox-cleanup:
+    enabled: ${AUTH_OUTBOX_CLEANUP_ENABLED:true}
+    fixed-delay-ms: ${AUTH_OUTBOX_CLEANUP_FIXED_DELAY_MS:3600000}
+    published-retention-days: ${AUTH_OUTBOX_CLEANUP_PUBLISHED_RETENTION_DAYS:7}
+    failed-retention-days: ${AUTH_OUTBOX_CLEANUP_FAILED_RETENTION_DAYS:30}
+    batch-size: ${AUTH_OUTBOX_CLEANUP_BATCH_SIZE:500}
+
   kafka:
     topics:
       notification-commands: notification.commands.v1
