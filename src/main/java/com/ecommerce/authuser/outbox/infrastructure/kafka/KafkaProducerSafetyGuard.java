@@ -21,20 +21,34 @@ public class KafkaProducerSafetyGuard implements SmartInitializingSingleton {
 
     @Override
     public void afterSingletonsInstantiated() {
-        String acks = required("spring.kafka.producer.acks");
+        String acks = required(
+                "spring.kafka.producer.acks"
+        );
+
         boolean idempotenceEnabled = booleanValue(
-                "spring.kafka.producer.properties.enable.idempotence"
+                "spring.kafka.producer.properties.enable.idempotence",
+                "spring.kafka.producer.properties[enable.idempotence]"
         );
-        int retries = intValue("spring.kafka.producer.retries");
+
+        int retries = intValue(
+                "spring.kafka.producer.retries"
+        );
+
         int maxInFlight = intValue(
-                "spring.kafka.producer.properties.max.in.flight.requests.per.connection"
+                "spring.kafka.producer.properties.max.in.flight.requests.per.connection",
+                "spring.kafka.producer.properties[max.in.flight.requests.per.connection]"
         );
+
         long deliveryTimeoutMs = longValue(
-                "spring.kafka.producer.properties.delivery.timeout.ms"
+                "spring.kafka.producer.properties.delivery.timeout.ms",
+                "spring.kafka.producer.properties[delivery.timeout.ms]"
         );
+
         long requestTimeoutMs = longValue(
-                "spring.kafka.producer.properties.request.timeout.ms"
+                "spring.kafka.producer.properties.request.timeout.ms",
+                "spring.kafka.producer.properties[request.timeout.ms]"
         );
+
         long sendTimeoutMs = outboxPublisherProperties.getSendTimeoutMs();
 
         if (!"all".equalsIgnoreCase(acks)) {
@@ -74,27 +88,29 @@ public class KafkaProducerSafetyGuard implements SmartInitializingSingleton {
         }
     }
 
-    private String required(String key) {
-        String value = environment.getProperty(key);
+    private boolean booleanValue(String... keys) {
+        return Boolean.parseBoolean(required(keys));
+    }
 
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException(
-                    "Missing required Kafka producer property: " + key
-            );
+    private int intValue(String... keys) {
+        return Integer.parseInt(required(keys));
+    }
+
+    private long longValue(String... keys) {
+        return Long.parseLong(required(keys));
+    }
+
+    private String required(String... keys) {
+        for (String key : keys) {
+            String value = environment.getProperty(key);
+
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
         }
 
-        return value;
-    }
-
-    private boolean booleanValue(String key) {
-        return Boolean.parseBoolean(required(key));
-    }
-
-    private int intValue(String key) {
-        return Integer.parseInt(required(key));
-    }
-
-    private long longValue(String key) {
-        return Long.parseLong(required(key));
+        throw new IllegalStateException(
+                "Missing required Kafka producer property: " + keys[0]
+        );
     }
 }
