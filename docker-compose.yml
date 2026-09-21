@@ -44,6 +44,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -128,14 +130,15 @@ services:
       kafka:
         condition: service_healthy
 
+    environment:
+      KAFKA_BOOTSTRAP_SERVER: kafka:9092
+
+    volumes:
+      - ./docker/kafka/create-topics.sh:/opt/taca/kafka/create-topics.sh:ro
+
     command:
       - /bin/sh
-      - -c
-      - |
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic notification.commands.v1 --partitions 3 --replication-factor 1
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic user.events.v1 --partitions 3 --replication-factor 1
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic shop.events.v1 --partitions 3 --replication-factor 1
-        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic auth-user.events.dlq.v1 --partitions 3 --replication-factor 1
+      - /opt/taca/kafka/create-topics.sh
 
     restart: "no"
 
