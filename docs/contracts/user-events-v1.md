@@ -14,13 +14,7 @@ Other services may consume this topic to update read models, profiles, search in
 
 ## Kafka Key
 
-The Kafka record key is:
-
-```text
-partition_key
-```
-
-For user events, the partition key is usually the user id string.
+The Kafka record key is the user id string for user events. The key is not duplicated in the message body.
 
 ## Headers
 
@@ -43,7 +37,7 @@ All user events use this top-level shape:
   "schema_version": 1,
   "aggregate_type": "USER",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": null,
   "occurred_at": "2026-09-21T10:00:00Z",
   "payload": {}
 }
@@ -58,7 +52,7 @@ All user events use this top-level shape:
 | `schema_version` | number | Yes | Contract version |
 | `aggregate_type` | string | Yes | Aggregate type |
 | `aggregate_id` | string UUID | Yes | Aggregate id |
-| `partition_key` | string | Yes | Kafka partition key |
+| `actor_user_id` | string UUID or null | Yes | User id that caused the event, or null for system events |
 | `occurred_at` | string ISO-8601 | Yes | Event timestamp |
 | `payload` | object | Yes | Event-specific payload |
 
@@ -117,7 +111,7 @@ Required top-level fields must not be removed without a new topic or schema vers
   "schema_version": 1,
   "aggregate_type": "USER",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": null,
   "occurred_at": "2026-09-21T10:00:00Z",
   "payload": {
     "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
@@ -147,7 +141,7 @@ Required top-level fields must not be removed without a new topic or schema vers
   "schema_version": 1,
   "aggregate_type": "USER",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": null,
   "occurred_at": "2026-09-21T10:05:00Z",
   "payload": {
     "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
@@ -212,7 +206,7 @@ The payload must not include password, password hash, reset token, or raw secret
   "schema_version": 1,
   "aggregate_type": "USER",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
   "occurred_at": "2026-09-21T10:10:00Z",
   "payload": {
     "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
