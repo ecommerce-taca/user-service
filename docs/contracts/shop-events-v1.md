@@ -14,13 +14,7 @@ Other services may consume this topic to update seller profiles, shop read model
 
 ## Kafka Key
 
-The Kafka record key is:
-
-```text
-partition_key
-```
-
-For shop events, the partition key is usually the shop id string.
+The Kafka record key is the shop id string for shop events. The key is not duplicated in the message body.
 
 ## Headers
 
@@ -43,7 +37,7 @@ All shop events use this top-level shape:
   "schema_version": 1,
   "aggregate_type": "SHOP",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+  "actor_user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589000",
   "occurred_at": "2026-09-21T10:00:00Z",
   "payload": {}
 }
@@ -58,7 +52,7 @@ All shop events use this top-level shape:
 | `schema_version` | number | Yes | Contract version |
 | `aggregate_type` | string | Yes | Aggregate type |
 | `aggregate_id` | string UUID | Yes | Aggregate id |
-| `partition_key` | string | Yes | Kafka partition key |
+| `actor_user_id` | string UUID or null | Yes | User id that caused the event, or null for system events |
 | `occurred_at` | string ISO-8601 | Yes | Event timestamp |
 | `payload` | object | Yes | Event-specific payload |
 
@@ -123,7 +117,7 @@ Required top-level fields must not be removed without a new topic or schema vers
   "schema_version": 1,
   "aggregate_type": "SHOP",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+  "actor_user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589000",
   "occurred_at": "2026-09-21T10:10:00Z",
   "payload": {
     "shop_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
@@ -162,7 +156,7 @@ Required top-level fields must not be removed without a new topic or schema vers
   "schema_version": 1,
   "aggregate_type": "SHOP",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+  "actor_user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589001",
   "occurred_at": "2026-09-21T10:15:00Z",
   "payload": {
     "shop_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
@@ -242,7 +236,7 @@ Required top-level fields must not be removed without a new topic or schema vers
   "schema_version": 1,
   "aggregate_type": "SHOP",
   "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
-  "partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+  "actor_user_id": null,
   "occurred_at": "2026-09-21T10:20:00Z",
   "payload": {
     "shop_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
