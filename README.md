@@ -201,3 +201,5 @@ Dừng bằng `Ctrl+C`.
 ## Contracts
 
 - [Notification Command v1](docs/contracts/notification-command-v1.md)
+- [User Events v1](docs/contracts/user-events-v1.md)
+- [Shop Events v1](docs/contracts/shop-events-v1.md)
