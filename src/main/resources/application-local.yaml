@@ -91,6 +91,10 @@ auth:
     retry-backoff-seconds: 2
     send-timeout-ms: ${AUTH_OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:35000}
 
+    max-pending-events: ${AUTH_OUTBOX_MAX_PENDING_EVENTS:1000}
+    max-oldest-pending-age-seconds: ${AUTH_OUTBOX_MAX_OLDEST_PENDING_AGE_SECONDS:300}
+    max-failed-events: ${AUTH_OUTBOX_MAX_FAILED_EVENTS:0}
+
   kafka:
     topics:
       notification-commands: notification.commands.v1
