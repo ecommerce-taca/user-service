@@ -6,6 +6,14 @@
 notification.commands.v1
 ```
 
+## JSON Schema
+
+Canonical schema:
+
+```text
+docs/contracts/schema/notification-command-v1.schema.json
+```
+
 ## Purpose
 
 `auth-user-service` publishes notification commands to this topic through the transactional outbox publisher.
