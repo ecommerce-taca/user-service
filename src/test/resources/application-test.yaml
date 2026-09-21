@@ -68,6 +68,10 @@ auth:
     batch-size: 500
 
   kafka:
+    topic-guard:
+      enabled: false
+      timeout-seconds: 10
+
     topics:
       notification-commands: notification.commands.v1
       user-events: user.events.v1
