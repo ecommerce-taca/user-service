@@ -1,4 +1,14 @@
 spring:
+  kafka:
+    producer:
+      acks: all
+      retries: 10
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 10000
+
   datasource:
     hikari:
       data-source-properties:

@@ -197,3 +197,9 @@ Dừng bằng `Ctrl+C`.
 - `docker/kafka/smoke-test.sh` kiểm tra Kafka produce/consume.
 - `docker/kafka/outbox-e2e-smoke-test.sh` kiểm tra Kafka messages sau khi signup API tạo outbox.
 - Các file `.sh` cần dùng line ending `LF`, không dùng `CRLF`.
+
+## Contracts
+
+- [Notification Command v1](docs/contracts/notification-command-v1.md)
+- [User Events v1](docs/contracts/user-events-v1.md)
+- [Shop Events v1](docs/contracts/shop-events-v1.md)
