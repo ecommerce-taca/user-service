@@ -8,6 +8,7 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -81,4 +82,35 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, UUID> 
     Optional<Instant> findOldestReadyToPublishCreatedAt(
             @Param("now") Instant now
     );
+
+    @Query("""
+        select event.id
+        from OutboxEvent event
+        where event.publishedAt is not null
+          and event.publishedAt < :cutoff
+        order by event.publishedAt asc
+        """)
+    List<UUID> findPublishedIdsForCleanup(
+            @Param("cutoff") Instant cutoff,
+            Pageable pageable
+    );
+
+    @Query("""
+        select event.id
+        from OutboxEvent event
+        where event.failedAt is not null
+          and event.failedAt < :cutoff
+        order by event.failedAt asc
+        """)
+    List<UUID> findFailedIdsForCleanup(
+            @Param("cutoff") Instant cutoff,
+            Pageable pageable
+    );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        delete from OutboxEvent event
+        where event.id in :ids
+        """)
+    int deleteAllByIdIn(@Param("ids") List<UUID> ids);
 }

@@ -60,6 +60,13 @@ auth:
     max-oldest-pending-age-seconds: 300
     max-failed-events: 0
 
+  outbox-cleanup:
+    enabled: false
+    fixed-delay-ms: 3600000
+    published-retention-days: 7
+    failed-retention-days: 30
+    batch-size: 500
+
   kafka:
     topics:
       notification-commands: notification.commands.v1
