@@ -106,6 +106,10 @@ auth:
     batch-size: ${AUTH_OUTBOX_CLEANUP_BATCH_SIZE:500}
 
   kafka:
+    topic-guard:
+      enabled: ${AUTH_KAFKA_TOPIC_GUARD_ENABLED:true}
+      timeout-seconds: ${AUTH_KAFKA_TOPIC_GUARD_TIMEOUT_SECONDS:10}
+
     topics:
       notification-commands: notification.commands.v1
       user-events: user.events.v1
