@@ -41,8 +41,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EmailVerificationResendService {
 
-    private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofHours(24);
-
     private static final Duration RESEND_WINDOW = Duration.ofHours(1);
 
     private static final long MAX_RESENDS_PER_WINDOW = 3;
@@ -66,6 +64,8 @@ public class EmailVerificationResendService {
     private final AuditLogRepository auditLogRepository;
 
     private final AuditValueHasher auditValueHasher;
+
+    private final EmailVerificationProperties emailVerificationProperties;
 
     @Transactional
     public EmailResendResult resend(EmailResendCommand command) {
@@ -110,7 +110,9 @@ public class EmailVerificationResendService {
 
         String verificationHash = tokenHasher.hash(rawVerificationToken);
 
-        Instant expiresAt = now.plus(EMAIL_VERIFICATION_TTL);
+        Duration emailVerificationTtl = emailVerificationProperties.tokenTtl();
+
+        Instant expiresAt = now.plus(emailVerificationTtl);
 
         VerificationToken newToken =
                 VerificationToken.create(
@@ -167,7 +169,7 @@ public class EmailVerificationResendService {
                                         notificationLinkFactory.emailVerificationData(
                                                 user.getFullName(),
                                                 rawVerificationToken,
-                                                EMAIL_VERIFICATION_TTL
+                                                emailVerificationTtl
                                         )
                                 )
                         )

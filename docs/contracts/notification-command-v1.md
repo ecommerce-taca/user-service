@@ -147,8 +147,8 @@ challenge_id
   "template": "auth-email-verification-v1",
   "data": {
     "display_name": "Smoke Test User",
-    "verification_url": "https://taca.vn/verify?token=opaque-token",
-    "expires_in_minutes": 1440
+    "verification_url": "https://taca.vn/verify?t=opaque-token",
+    "expires_in_minutes": 30
   }
 }
 ```
