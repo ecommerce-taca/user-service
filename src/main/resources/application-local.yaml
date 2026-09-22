@@ -90,7 +90,7 @@ auth:
     previous-public-key-base64: ${JWT_PREVIOUS_PUBLIC_KEY_BASE64:}
 
   outbox-publisher:
-    enabled: true
+    enabled: ${AUTH_OUTBOX_PUBLISHER_ENABLED:true}
     batch-size: 50
     fixed-delay-ms: 2000
     max-retries: 3
