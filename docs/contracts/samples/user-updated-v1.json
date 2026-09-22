@@ -1,0 +1,19 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588022",
+  "event_type": "user.updated",
+  "schema_version": 1,
+  "occurred_at": "2026-09-21T10:10:00Z",
+  "aggregate_type": "USER",
+  "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "payload": {
+    "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+    "changed_fields": [
+      "full_name"
+    ],
+    "snapshot": {
+      "full_name": "Updated Name"
+    },
+    "updated_at": "2026-09-21T10:10:00Z"
+  }
+}
