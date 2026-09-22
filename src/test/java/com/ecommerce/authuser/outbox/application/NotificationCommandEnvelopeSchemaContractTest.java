@@ -78,8 +78,8 @@ class NotificationCommandEnvelopeSchemaContractTest {
                 "dedupe_key", "email-verification:" + userId + ":token-id",
                 "data", Map.of(
                         "display_name", "Smoke Test User",
-                        "verification_url", "https://taca.vn/verify?token=opaque-token",
-                        "expires_in_minutes", 1440
+                        "verification_url", "https://taca.vn/verify?t=opaque-token",
+                        "expires_in_minutes", 30
                 )
         );
 

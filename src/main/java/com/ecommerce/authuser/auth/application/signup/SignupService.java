@@ -1,6 +1,7 @@
 package com.ecommerce.authuser.auth.application.signup;
 
 import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.application.verification.email.EmailVerificationProperties;
 import com.ecommerce.authuser.auth.exception.signup.EmailAlreadyExistsException;
 import com.ecommerce.authuser.auth.exception.signup.PhoneAlreadyExistsException;
 import com.ecommerce.authuser.auth.security.AccessTokenService;
@@ -41,8 +42,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SignupService {
 
-    private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofHours(24);
-
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -68,6 +67,8 @@ public class SignupService {
     private final OutboxPayloadProtector outboxPayloadProtector;
 
     private final NotificationLinkFactory notificationLinkFactory;
+
+    private final EmailVerificationProperties emailVerificationProperties;
 
     @Transactional
     public SignupResult signup(SignupCommand command) {
@@ -120,7 +121,9 @@ public class SignupService {
 
         String verificationHash = tokenHasher.hash(rawVerificationToken);
 
-        Instant verificationExpiresAt = now.plus(EMAIL_VERIFICATION_TTL);
+        Duration emailVerificationTtl = emailVerificationProperties.tokenTtl();
+
+        Instant verificationExpiresAt = now.plus(emailVerificationTtl);
 
         VerificationToken verificationToken = VerificationToken.create(
                 user,
@@ -205,7 +208,7 @@ public class SignupService {
                                 notificationLinkFactory.emailVerificationData(
                                         user.getFullName(),
                                         rawVerificationToken,
-                                        EMAIL_VERIFICATION_TTL
+                                        emailVerificationTtl
                                 )
                         )
                 )

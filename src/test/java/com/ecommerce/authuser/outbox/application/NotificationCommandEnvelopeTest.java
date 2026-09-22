@@ -41,7 +41,7 @@ class NotificationCommandEnvelopeTest {
                                 "data", Map.of(
                                         "display_name", "Nguyen Minh Anh",
                                         "verification_url", "https://taca.vn/verify?t=abc",
-                                        "expires_in_minutes", 1440L
+                                        "expires_in_minutes", 30L
                                 )
                         )
                 );
@@ -110,7 +110,7 @@ class NotificationCommandEnvelopeTest {
                                         + ":token-id",
                                 "data", Map.of(
                                         "verification_url", "https://taca.vn/verify?t=abc",
-                                        "expires_in_minutes", 1440L
+                                        "expires_in_minutes", 30L
                                 )
                         )
                 );
