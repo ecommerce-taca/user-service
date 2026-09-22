@@ -9,7 +9,7 @@ This directory documents Kafka contracts published by `auth-user-service`.
 | `notification.commands.v1` | [Notification Command v1](notification-command-v1.md) | `auth-user-service` | notification service |
 | `user.events.v1` | [User Events v1](user-events-v1.md) | `auth-user-service` | downstream services |
 | `shop.events.v1` | [Shop Events v1](shop-events-v1.md) | `auth-user-service` | downstream services |
-| `auth-user.events.dlq.v1` | DLQ payload emitted by outbox publisher | `auth-user-service` | operators / diagnostics |
+| `auth-user.events.dlq.v1` | [Auth User DLQ v1](auth-user-dlq-v1.md) | `auth-user-service` | operators / diagnostics |
 
 ## Contract Files
 
@@ -20,6 +20,7 @@ This directory documents Kafka contracts published by `auth-user-service`.
 | [shop-events-v1.md](shop-events-v1.md) | Shop domain event contract |
 | [schema/notification-command-v1.schema.json](schema/notification-command-v1.schema.json) | JSON Schema for notification command messages |
 | [samples/README.md](samples/README.md) | Sample fixture index |
+| [auth-user-dlq-v1.md](auth-user-dlq-v1.md) | Outbox dead-letter event contract |
 
 ## Sample Fixtures
 

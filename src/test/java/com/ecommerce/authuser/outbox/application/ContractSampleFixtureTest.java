@@ -19,6 +19,7 @@ class ContractSampleFixtureTest {
     );
 
     private static final Set<String> SECRET_FIELD_NAMES = Set.of(
+            "original_payload",
             "verification_token",
             "reset_token",
             "otp",
@@ -147,6 +148,54 @@ class ContractSampleFixtureTest {
 
             assertNoSecretFields(file, root);
         }
+    }
+
+    @Test
+    void dlqSample_shouldMatchDlqEventShape()
+            throws Exception {
+        Path file = SAMPLE_DIR.resolve("auth-user-dlq-v1.json");
+
+        JsonNode root = readJson(file);
+
+        assertDomainEventShape(file, root);
+
+        assertThat(root.has("payload"))
+                .as(file.toString())
+                .isTrue();
+
+        JsonNode payload = root.get("payload");
+
+        assertThat(payload.has("original_event_type"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("original_aggregate_type"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("original_aggregate_id"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("original_partition_key"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("original_payload_redacted"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.get("original_payload_redacted").asBoolean())
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("failure_code"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("failure_message"))
+                .as(file.toString())
+                .isTrue();
+        assertThat(payload.has("attempt_count"))
+                .as(file.toString())
+                .isTrue();
+
+        assertThat(payload.has("original_payload"))
+                .as(file.toString())
+                .isFalse();
     }
 
     private void assertDomainEventShape(
