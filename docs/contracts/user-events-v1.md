@@ -220,3 +220,21 @@ The payload must not include password, password hash, reset token, or raw secret
   }
 }
 ```
+
+## Sample Fixtures
+
+Sample Kafka message bodies are available under:
+
+```text
+docs/contracts/samples/
+```
+
+User event samples:
+
+| File | Event Type |
+|---|---|
+| `user-created-v1.json` | `user.created` |
+| `user-email-verified-v1.json` | `user.email_verified` |
+| `user-updated-v1.json` | `user.updated` |
+
+These files represent Kafka record values only. Kafka headers and record keys are documented in this contract.

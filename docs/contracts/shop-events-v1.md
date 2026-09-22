@@ -248,3 +248,21 @@ Required top-level fields must not be removed without a new topic or schema vers
   }
 }
 ```
+
+## Sample Fixtures
+
+Sample Kafka message bodies are available under:
+
+```text
+docs/contracts/samples/
+```
+
+Shop event samples:
+
+| File | Event Type |
+|---|---|
+| `shop-updated-v1.json` | `shop.updated` |
+| `shop-status-changed-v1.json` | `shop.status_changed` |
+| `shop-kyc-expired-v1.json` | `shop.kyc.expired` |
+
+These files represent Kafka record values only. Kafka headers and record keys are documented in this contract.
