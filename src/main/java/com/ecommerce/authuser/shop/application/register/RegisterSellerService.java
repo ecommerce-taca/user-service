@@ -150,9 +150,10 @@ public class RegisterSellerService {
             User user
     ) {
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
                         shop.getId(),
+                        user.getId(),
                         "shop.created",
                         EVENT_SCHEMA_VERSION,
                         shop.getId().toString(),
@@ -177,8 +178,9 @@ public class RegisterSellerService {
     ) {
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.USER,
+                        user.getId(),
                         user.getId(),
                         "user.role_changed",
                         EVENT_SCHEMA_VERSION,

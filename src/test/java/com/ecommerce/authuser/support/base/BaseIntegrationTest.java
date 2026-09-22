@@ -16,8 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Import;
+import com.ecommerce.authuser.support.container.MySqlTestContainerConfiguration;
 
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, MySqlTestContainerConfiguration.class})
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

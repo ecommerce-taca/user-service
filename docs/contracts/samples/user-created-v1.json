@@ -1,0 +1,16 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588021",
+  "event_type": "user.created",
+  "schema_version": 1,
+  "occurred_at": "2026-09-21T10:00:00Z",
+  "aggregate_type": "USER",
+  "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": null,
+  "payload": {
+    "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+    "email": "user@example.com",
+    "full_name": "Smoke Test User",
+    "status": "PENDING_VERIFICATION",
+    "created_at": "2026-09-21T10:00:00Z"
+  }
+}

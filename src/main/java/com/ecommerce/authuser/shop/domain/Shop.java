@@ -69,6 +69,10 @@ public class Shop {
     @Column(name = "kyc_status", nullable = false, length = 16)
     private KycStatus kycStatus;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Getter(AccessLevel.NONE)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "warehouse_snapshot", columnDefinition = "JSON")
@@ -335,6 +339,28 @@ public class Shop {
         }
 
         this.kycStatus = decision;
+
+        if (decision == KycStatus.APPROVED
+                && status == ShopStatus.DRAFT) {
+            status = ShopStatus.ACTIVE;
+        }
+    }
+
+    public void expireKyc() {
+        if (status == ShopStatus.SUSPENDED
+                || status == ShopStatus.DELETED) {
+            throw new IllegalStateException(
+                    "Shop cannot expire KYC"
+            );
+        }
+
+        if (kycStatus != KycStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING shop KYC can expire"
+            );
+        }
+
+        kycStatus = KycStatus.EXPIRED;
     }
 
     @PrePersist

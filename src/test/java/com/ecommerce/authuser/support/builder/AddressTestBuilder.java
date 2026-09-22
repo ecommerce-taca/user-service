@@ -20,6 +20,15 @@ public final class AddressTestBuilder {
     private String line2 =
             AddressTestData.LINE2;
 
+    private String countryCode =
+            AddressTestData.COUNTRY_CODE;
+
+    private String provinceCode =
+            AddressTestData.PROVINCE_CODE;
+
+    private String wardCode =
+            AddressTestData.WARD_CODE;
+
     private String ward =
             AddressTestData.WARD;
 
@@ -67,6 +76,21 @@ public final class AddressTestBuilder {
         return this;
     }
 
+    public AddressTestBuilder withCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+        return this;
+    }
+
+    public AddressTestBuilder withProvinceCode(String provinceCode) {
+        this.provinceCode = provinceCode;
+        return this;
+    }
+
+    public AddressTestBuilder withWardCode(String wardCode) {
+        this.wardCode = wardCode;
+        return this;
+    }
+
     public AddressTestBuilder withWard(String ward) {
         this.ward = ward;
         return this;
@@ -110,9 +134,12 @@ public final class AddressTestBuilder {
                 phone,
                 line1,
                 line2,
+                countryCode,
+                provinceCode,
+                province,
+                wardCode,
                 ward,
                 district,
-                province,
                 postalCode,
                 defaultAddress
         );

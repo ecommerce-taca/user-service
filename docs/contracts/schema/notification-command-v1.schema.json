@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taca.vn/contracts/notification-command-v1.schema.json",
+  "title": "Notification Command v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "schema_version",
+    "command_type",
+    "occurred_at",
+    "dedupe_key",
+    "user_id",
+    "channel",
+    "recipient",
+    "template",
+    "data"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "command_type": {
+      "type": "string",
+      "enum": [
+        "AUTH_VERIFICATION_REQUESTED",
+        "PASSWORD_RESET_REQUESTED",
+        "PHONE_OTP_REQUESTED"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "EMAIL",
+        "SMS"
+      ]
+    },
+    "recipient": {
+      "type": "string",
+      "minLength": 1
+    },
+    "template": {
+      "type": "string",
+      "minLength": 1
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

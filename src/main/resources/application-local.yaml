@@ -7,8 +7,8 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/userdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&tinyInt1isBit=false}
-    username: ${DB_USERNAME:ecommerce}
-    password: ${DB_PASSWORD:ecommerce}
+    username: ${MYSQL_USER:ecommerce}
+    password: ${MYSQL_PASSWORD:nhat15042005}
 
   jpa:
     open-in-view: false
@@ -34,9 +34,43 @@ spring:
       connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
       timeout: ${REDIS_TIMEOUT:2s}
 
+  kafka:
+    kafka:
+      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+
+      producer:
+        acks: all
+        retries: ${SPRING_KAFKA_PRODUCER_RETRIES:10}
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+        properties:
+          enable.idempotence: true
+          max.in.flight.requests.per.connection: 5
+          delivery.timeout.ms: 30000
+          request.timeout.ms: 10000
+          retry.backoff.ms: 1000
+          linger.ms: 5
+
 auth:
   outbox:
     encryption-key-base64: ${AUTH_OUTBOX_ENCRYPTION_KEY_BASE64}
+
+  kyc-expiry:
+    enabled: ${AUTH_KYC_EXPIRY_ENABLED:true}
+    batch-size: ${AUTH_KYC_EXPIRY_BATCH_SIZE:50}
+    fixed-delay-ms: ${AUTH_KYC_EXPIRY_FIXED_DELAY_MS:60000}
+
+  kyc-submission:
+    expiry-days: ${AUTH_KYC_SUBMISSION_EXPIRY_DAYS:30}
+
+  notification-links:
+    public-base-url: ${AUTH_PUBLIC_BASE_URL:https://taca.vn}
+    email-verification-path: ${AUTH_EMAIL_VERIFICATION_PATH:/verify}
+    password-reset-path: ${AUTH_PASSWORD_RESET_PATH:/reset-password}
+
+  email-verification:
+    ttl-minutes: ${AUTH_EMAIL_VERIFICATION_TTL_MINUTES:30}
 
   audit:
     hash-key-base64: ${AUTH_AUDIT_HASH_KEY_BASE64}
@@ -54,3 +88,33 @@ auth:
 
     previous-key-id: ${JWT_PREVIOUS_KEY_ID:}
     previous-public-key-base64: ${JWT_PREVIOUS_PUBLIC_KEY_BASE64:}
+
+  outbox-publisher:
+    enabled: true
+    batch-size: 50
+    fixed-delay-ms: 2000
+    max-retries: 3
+    retry-backoff-seconds: 2
+    send-timeout-ms: ${AUTH_OUTBOX_PUBLISHER_SEND_TIMEOUT_MS:35000}
+
+    max-pending-events: ${AUTH_OUTBOX_MAX_PENDING_EVENTS:1000}
+    max-oldest-pending-age-seconds: ${AUTH_OUTBOX_MAX_OLDEST_PENDING_AGE_SECONDS:300}
+    max-failed-events: ${AUTH_OUTBOX_MAX_FAILED_EVENTS:0}
+
+  outbox-cleanup:
+    enabled: ${AUTH_OUTBOX_CLEANUP_ENABLED:true}
+    fixed-delay-ms: ${AUTH_OUTBOX_CLEANUP_FIXED_DELAY_MS:3600000}
+    published-retention-days: ${AUTH_OUTBOX_CLEANUP_PUBLISHED_RETENTION_DAYS:7}
+    failed-retention-days: ${AUTH_OUTBOX_CLEANUP_FAILED_RETENTION_DAYS:30}
+    batch-size: ${AUTH_OUTBOX_CLEANUP_BATCH_SIZE:500}
+
+  kafka:
+    topic-guard:
+      enabled: ${AUTH_KAFKA_TOPIC_GUARD_ENABLED:true}
+      timeout-seconds: ${AUTH_KAFKA_TOPIC_GUARD_TIMEOUT_SECONDS:10}
+
+    topics:
+      notification-commands: notification.commands.v1
+      user-events: user.events.v1
+      shop-events: shop.events.v1
+      dlq: auth-user.events.dlq.v1

@@ -1,0 +1,15 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588020",
+  "schema_version": 1,
+  "command_type": "PHONE_OTP_REQUESTED",
+  "occurred_at": "2026-09-21T10:10:00Z",
+  "dedupe_key": "phone-otp:challenge-id",
+  "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "channel": "SMS",
+  "recipient": "+84901234567",
+  "template": "auth-phone-otp-v1",
+  "data": {
+    "challenge_id": "challenge-id",
+    "expires_in_minutes": 5
+  }
+}

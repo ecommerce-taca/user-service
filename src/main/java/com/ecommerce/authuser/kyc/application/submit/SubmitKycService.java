@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,8 @@ public class SubmitKycService {
     private final KycDocumentRepository kycDocumentRepository;
 
     private final OutboxEventRepository outboxEventRepository;
+
+    private final KycSubmissionProperties properties;
 
     @Transactional
     public SubmitKycResult submit(SubmitKycCommand command) {
@@ -142,7 +145,14 @@ public class SubmitKycService {
 
         Instant now = Instant.now();
 
-        kycCase.submit(now);
+        Instant expiresAt = now.plus(
+                properties.expiryTtl()
+        );
+
+        kycCase.submit(
+                now,
+                expiresAt
+        );
 
         try {
             shop.markKycPending();
@@ -160,6 +170,7 @@ public class SubmitKycService {
         sellerOnboardingRepository.saveAndFlush(onboarding);
 
         createSubmittedEvent(
+                command.userId(),
                 shop,
                 kycCase,
                 documentTypes
@@ -215,15 +226,17 @@ public class SubmitKycService {
     }
 
     private void createSubmittedEvent(
+            UUID actorUserId,
             Shop shop,
             KycCase kycCase,
             List<String> documentTypes
     ) {
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
                         shop.getId(),
+                        actorUserId,
                         "shop.kyc.submitted",
                         EVENT_SCHEMA_VERSION,
                         shop.getId().toString(),
@@ -233,7 +246,9 @@ public class SubmitKycService {
                                 "kyc_case_id",
                                 kycCase.getId().toString(),
                                 "document_types",
-                                documentTypes
+                                documentTypes,
+                                "expires_at",
+                                kycCase.getExpiresAt().toString()
                         )
                 );
 

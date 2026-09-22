@@ -1,5 +1,9 @@
 package com.ecommerce.authuser.shop.application.profile.update;
 
+import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
+import com.ecommerce.authuser.outbox.domain.OutboxEvent;
+import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
+import com.ecommerce.authuser.outbox.security.OutboxPayloadProtector;
 import com.ecommerce.authuser.rbac.domain.RbacKeys;
 import com.ecommerce.authuser.rbac.repository.UserRoleRepository;
 
@@ -17,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class UpdateSellerShopService {
@@ -24,6 +30,10 @@ public class UpdateSellerShopService {
     private final ShopRepository shopRepository;
 
     private final UserRoleRepository userRoleRepository;
+
+    private final OutboxEventRepository outboxEventRepository;
+
+    private final OutboxPayloadProtector outboxPayloadProtector;
 
     @Transactional
     public UpdateSellerShopResult update(UpdateSellerShopCommand command) {
@@ -82,6 +92,23 @@ public class UpdateSellerShopService {
             throw new ShopInvalidStateException();
         }
 
+        List<String> changedFields = new ArrayList<>();
+
+        if (command.nameProvided()
+                && !Objects.equals(shop.getName(), name)) {
+            changedFields.add("name");
+        }
+
+        if (command.descriptionProvided()
+                && !Objects.equals(shop.getDescription(), description)) {
+            changedFields.add("description");
+        }
+
+        if (command.logoObjectKeyProvided()
+                && !Objects.equals(shop.getLogoObjectKey(), logoObjectKey)) {
+            changedFields.add("logo_object_key");
+        }
+
         try {
             shop.updateSellerProfile(
                     command.nameProvided(),
@@ -100,6 +127,14 @@ public class UpdateSellerShopService {
         }
 
         shopRepository.saveAndFlush(shop);
+
+        if (!changedFields.isEmpty()) {
+            createShopUpdatedEvent(
+                    command.userId(),
+                    shop,
+                    changedFields
+            );
+        }
 
         return new UpdateSellerShopResult(
                 shop.getId(),
@@ -172,5 +207,49 @@ public class UpdateSellerShopService {
         }
 
         throw new InvalidSellerShopProfileException();
+    }
+
+    private void createShopUpdatedEvent(
+            UUID actorUserId,
+            Shop shop,
+            List<String> changedFields
+    ) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+
+        if (changedFields.contains("name")) {
+            snapshot.put("name", shop.getName());
+        }
+
+        if (changedFields.contains("description")) {
+            snapshot.put("description", shop.getDescription());
+        }
+
+        if (changedFields.contains("logo_object_key")) {
+            snapshot.put("logo_object_key", shop.getLogoObjectKey());
+        }
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+
+        payload.put("shop_id", shop.getId().toString());
+        payload.put("changed_fields", List.copyOf(changedFields));
+        payload.put("snapshot", snapshot);
+        payload.put("updated_at", shop.getUpdatedAt().toString());
+        payload.put("version", shop.getVersion());
+        
+        OutboxEvent event =
+                OutboxEvent.createWithActor(
+                        OutboxAggregateType.SHOP,
+                        shop.getId(),
+                        actorUserId,
+                        "shop.updated",
+                        (short) 1,
+                        shop.getId().toString(),
+                        outboxPayloadProtector.protect(
+                                "shop.updated",
+                                payload
+                        )
+                );
+
+        outboxEventRepository.save(event);
     }
 }

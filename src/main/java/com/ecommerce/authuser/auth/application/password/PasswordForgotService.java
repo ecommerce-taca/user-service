@@ -6,6 +6,7 @@ import com.ecommerce.authuser.auth.exception.password.InvalidPasswordRecoveryInp
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 
+import com.ecommerce.authuser.outbox.application.NotificationLinkFactory;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -48,6 +49,8 @@ public class PasswordForgotService {
     private final OutboxEventRepository outboxEventRepository;
 
     private final OutboxPayloadProtector outboxPayloadProtector;
+
+    private final NotificationLinkFactory notificationLinkFactory;
 
     @Transactional
     public PasswordForgotResult forgot(PasswordForgotCommand command) {
@@ -152,13 +155,9 @@ public class PasswordForgotService {
                                                 .getId(),
 
                                         "data",
-                                        Map.of(
-                                                "reset_token",
+                                        notificationLinkFactory.passwordResetData(
                                                 rawResetToken,
-
-                                                "expires_at",
-                                                expiresAt
-                                                        .toString()
+                                                RESET_TOKEN_TTL
                                         )
                                 )
                         )

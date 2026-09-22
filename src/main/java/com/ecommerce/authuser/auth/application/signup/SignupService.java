@@ -1,6 +1,7 @@
 package com.ecommerce.authuser.auth.application.signup;
 
 import com.ecommerce.authuser.auth.application.support.IdentityNormalizer;
+import com.ecommerce.authuser.auth.application.verification.email.EmailVerificationProperties;
 import com.ecommerce.authuser.auth.exception.signup.EmailAlreadyExistsException;
 import com.ecommerce.authuser.auth.exception.signup.PhoneAlreadyExistsException;
 import com.ecommerce.authuser.auth.security.AccessTokenService;
@@ -8,6 +9,7 @@ import com.ecommerce.authuser.auth.security.PasswordHasher;
 import com.ecommerce.authuser.auth.security.SecureTokenGenerator;
 import com.ecommerce.authuser.auth.security.TokenHasher;
 import com.ecommerce.authuser.common.id.UuidV7Generator;
+import com.ecommerce.authuser.outbox.application.NotificationLinkFactory;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -40,8 +42,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SignupService {
 
-    private static final Duration EMAIL_VERIFICATION_TTL = Duration.ofHours(24);
-
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -65,6 +65,10 @@ public class SignupService {
     private final OutboxEventRepository outboxEventRepository;
 
     private final OutboxPayloadProtector outboxPayloadProtector;
+
+    private final NotificationLinkFactory notificationLinkFactory;
+
+    private final EmailVerificationProperties emailVerificationProperties;
 
     @Transactional
     public SignupResult signup(SignupCommand command) {
@@ -117,7 +121,9 @@ public class SignupService {
 
         String verificationHash = tokenHasher.hash(rawVerificationToken);
 
-        Instant verificationExpiresAt = now.plus(EMAIL_VERIFICATION_TTL);
+        Duration emailVerificationTtl = emailVerificationProperties.tokenTtl();
+
+        Instant verificationExpiresAt = now.plus(emailVerificationTtl);
 
         VerificationToken verificationToken = VerificationToken.create(
                 user,
@@ -189,11 +195,21 @@ public class SignupService {
 
                                 "recipient", user.getEmail(),
 
-                                "display_name", user.getFullName(),
+                                "template",
+                                "auth-email-verification-v1",
 
-                                "verification_token", rawVerificationToken,
+                                "dedupe_key",
+                                "email-verification:"
+                                        + user.getId()
+                                        + ":"
+                                        + verificationToken.getId(),
 
-                                "expires_at", verificationExpiresAt.toString()
+                                "data",
+                                notificationLinkFactory.emailVerificationData(
+                                        user.getFullName(),
+                                        rawVerificationToken,
+                                        emailVerificationTtl
+                                )
                         )
                 )
         );

@@ -32,6 +32,7 @@ import com.ecommerce.authuser.shop.domain.KycStatus;
 import com.ecommerce.authuser.shop.domain.SellerOnboarding;
 import com.ecommerce.authuser.shop.domain.Shop;
 
+import com.ecommerce.authuser.shop.domain.ShopStatus;
 import com.ecommerce.authuser.shop.exception.ShopInvalidStateException;
 import com.ecommerce.authuser.shop.exception.ShopNotFoundException;
 
@@ -140,6 +141,8 @@ public class AdminKycReviewService {
 
         KycStatus oldShopKycStatus = shop.getKycStatus();
 
+        ShopStatus oldShopStatus = shop.getStatus();
+
         try {
             kycCase.review(
                     targetStatus,
@@ -192,6 +195,13 @@ public class AdminKycReviewService {
                 command,
                 shop,
                 kycCase
+        );
+
+        createShopStatusChangedEventIfNeeded(
+                command,
+                shop,
+                oldShopStatus,
+                now
         );
 
         return new AdminKycReviewResult(
@@ -380,10 +390,45 @@ public class AdminKycReviewService {
         }
 
         OutboxEvent event =
-                OutboxEvent.create(
+                OutboxEvent.createWithActor(
                         OutboxAggregateType.SHOP,
                         shop.getId(),
+                        command.actorUserId(),
                         eventType,
+                        EVENT_SCHEMA_VERSION,
+                        shop.getId().toString(),
+                        payload
+                );
+
+        outboxEventRepository.save(event);
+    }
+
+    private void createShopStatusChangedEventIfNeeded(
+            AdminKycReviewCommand command,
+            Shop shop,
+            ShopStatus oldStatus,
+            Instant changedAt
+    ) {
+        ShopStatus newStatus = shop.getStatus();
+
+        if (oldStatus == newStatus) {
+            return;
+        }
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+
+        payload.put("shop_id", shop.getId().toString());
+        payload.put("old_status", oldStatus.name());
+        payload.put("new_status", newStatus.name());
+        payload.put("reason", "KYC_APPROVED");
+        payload.put("changed_at", changedAt.toString());
+
+        OutboxEvent event =
+                OutboxEvent.createWithActor(
+                        OutboxAggregateType.SHOP,
+                        shop.getId(),
+                        command.actorUserId(),
+                        "shop.status_changed",
                         EVENT_SCHEMA_VERSION,
                         shop.getId().toString(),
                         payload

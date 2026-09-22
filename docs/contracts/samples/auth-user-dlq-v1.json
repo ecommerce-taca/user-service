@@ -1,0 +1,19 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589030",
+  "event_type": "user.created",
+  "schema_version": 1,
+  "occurred_at": "2026-09-21T10:30:00Z",
+  "aggregate_type": "USER",
+  "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "actor_user_id": null,
+  "payload": {
+    "original_event_type": "user.created",
+    "original_aggregate_type": "USER",
+    "original_aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+    "original_partition_key": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+    "original_payload_redacted": true,
+    "failure_code": "KAFKA_PUBLISH_FAILED",
+    "failure_message": "IllegalStateException",
+    "attempt_count": 3
+  }
+}

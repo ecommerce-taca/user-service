@@ -46,6 +46,13 @@ public class OutboxEvent {
     private UUID aggregateId;
 
     @Column(
+            name = "actor_user_id",
+            updatable = false,
+            columnDefinition = "BINARY(16)"
+    )
+    private UUID actorUserId;
+
+    @Column(
             name = "event_type",
             nullable = false,
             length = 64,
@@ -116,6 +123,26 @@ public class OutboxEvent {
             String partitionKey,
             Map<String, Object> payload
     ) {
+        return createWithActor(
+                aggregateType,
+                aggregateId,
+                null,
+                eventType,
+                schemaVersion,
+                partitionKey,
+                payload
+        );
+    }
+
+    public static OutboxEvent createWithActor(
+            OutboxAggregateType aggregateType,
+            UUID aggregateId,
+            UUID actorUserId,
+            String eventType,
+            short schemaVersion,
+            String partitionKey,
+            Map<String, Object> payload
+    ) {
         if (aggregateType == null) {
             throw new IllegalArgumentException(
                     "aggregateType must not be null"
@@ -163,6 +190,7 @@ public class OutboxEvent {
         event.id = UuidV7Generator.generate();
         event.aggregateType = aggregateType;
         event.aggregateId = aggregateId;
+        event.actorUserId = actorUserId;
         event.eventType = eventType;
         event.schemaVersion = schemaVersion;
         event.partitionKey = partitionKey;
@@ -207,46 +235,16 @@ public class OutboxEvent {
             Instant retryAt,
             int maxRetries
     ) {
+        this.attemptCount++;
 
-        if (publishedAt != null) {
-            throw new IllegalStateException(
-                    "Published event cannot fail"
-            );
-        }
-
-        if (failedAt != null) {
-            throw new IllegalStateException(
-                    "Event is already terminally failed"
-            );
-        }
-
-        if (maxRetries < 1 || maxRetries > 3) {
-            throw new IllegalArgumentException(
-                    "maxRetries must be between 1 and 3"
-            );
-        }
-
-        if (errorCode == null
-                || errorCode.isBlank()
-                || errorCode.length() > 64
-        ) {
-            throw new IllegalArgumentException(
-                    "Invalid error code"
-            );
-        }
-
-        lastErrorCode = errorCode;
-
-        if (attemptCount >= maxRetries) {
-            failedAt = now;
-
-            nextRetryAt = null;
-
+        if (this.attemptCount >= maxRetries) {
+            this.failedAt = now;
+            this.nextRetryAt = null;
+            this.lastErrorCode = errorCode;
             return;
         }
 
-        attemptCount++;
-
-        nextRetryAt = retryAt;
+        this.lastErrorCode = errorCode;
+        this.nextRetryAt = retryAt;
     }
 }

@@ -128,6 +128,26 @@ public class KycCase {
         reviewedAt = null;
 
         decisionReason = null;
+
+        expiresAt = null;
+    }
+
+    public void submit(
+            Instant now,
+            Instant expiresAt
+    ) {
+        Objects.requireNonNull(now);
+        Objects.requireNonNull(expiresAt);
+
+        if (!expiresAt.isAfter(now)) {
+            throw new IllegalArgumentException(
+                    "expiresAt must be after now"
+            );
+        }
+
+        submit(now);
+
+        this.expiresAt = expiresAt;
     }
 
     public void review(
@@ -161,6 +181,30 @@ public class KycCase {
         this.reviewedBy = reviewerUserId;
         this.reviewedAt = now;
         this.decisionReason = normalizedReason;
+    }
+
+    public void expire(Instant now) {
+        Objects.requireNonNull(now);
+
+        if (status != KycStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING KYC case can expire"
+            );
+        }
+
+        if (expiresAt == null || expiresAt.isAfter(now)) {
+            throw new IllegalStateException(
+                    "KYC case is not expired"
+            );
+        }
+
+        status = KycStatus.EXPIRED;
+
+        reviewedBy = null;
+
+        reviewedAt = null;
+
+        decisionReason = "KYC_EXPIRED";
     }
 
     private String normalizeDecisionReason(

@@ -10,6 +10,7 @@ import com.ecommerce.authuser.auth.exception.verification.phone.OtpRateLimitedEx
 import com.ecommerce.authuser.auth.security.OtpHasher;
 import com.ecommerce.authuser.auth.security.SecureOtpGenerator;
 
+import com.ecommerce.authuser.outbox.application.NotificationLinkFactory;
 import com.ecommerce.authuser.outbox.domain.OutboxAggregateType;
 import com.ecommerce.authuser.outbox.domain.OutboxEvent;
 import com.ecommerce.authuser.outbox.repository.OutboxEventRepository;
@@ -55,6 +56,8 @@ public class PhoneOtpRequestService {
     private final OtpHasher otpHasher;
 
     private final OutboxEventRepository outboxEventRepository;
+
+    private final NotificationLinkFactory notificationLinkFactory;
 
     private final OutboxPayloadProtector outboxPayloadProtector;
 
@@ -173,18 +176,9 @@ public class PhoneOtpRequestService {
                                                 .getId(),
 
                                         "data",
-                                        Map.of(
-                                                "challenge_id",
-                                                challenge
-                                                        .getId()
-                                                        .toString(),
-
-                                                "otp",
-                                                rawOtp,
-
-                                                "expires_at",
-                                                expiresAt
-                                                        .toString()
+                                        notificationLinkFactory.phoneOtpData(
+                                                challenge.getId().toString(),
+                                                OTP_TTL
                                         )
                                 )
                         )

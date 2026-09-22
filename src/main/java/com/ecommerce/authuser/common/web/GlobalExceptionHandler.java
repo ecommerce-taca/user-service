@@ -28,6 +28,8 @@ import com.ecommerce.authuser.favorite.exception.FavoriteLimitReachedException;
 import com.ecommerce.authuser.favorite.exception.InvalidFavoriteInputException;
 import com.ecommerce.authuser.favorite.exception.InvalidFavoriteQueryException;
 import com.ecommerce.authuser.kyc.exception.*;
+import com.ecommerce.authuser.location.exception.InvalidAdministrativeLocationException;
+import com.ecommerce.authuser.location.exception.ProvinceNotFoundException;
 import com.ecommerce.authuser.rbac.exception.AdminRbacPermissionDeniedException;
 import com.ecommerce.authuser.rbac.exception.InvalidRoleAssignmentException;
 import com.ecommerce.authuser.rbac.exception.RoleAssignmentExistsException;
@@ -345,6 +347,26 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "ADDRESS_DEFAULT_REQUIRED",
                 "Cần có một địa chỉ mặc định."
+        );
+    }
+
+    @ExceptionHandler(ProvinceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleProvinceNotFound(ProvinceNotFoundException ex) {
+        return buildError(
+                HttpStatus.NOT_FOUND,
+                "LOCATION_PROVINCE_NOT_FOUND",
+                "Khong tim thay Tinh/Thanh pho."
+        );
+    }
+
+    @ExceptionHandler(InvalidAdministrativeLocationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidAdministrativeLocation(
+            InvalidAdministrativeLocationException ex
+    ) {
+        return buildError(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "ADDRESS_LOCATION_INVALID",
+                "Tinh/Thanh pho va Xa/Phuong khong hop le."
         );
     }
 
