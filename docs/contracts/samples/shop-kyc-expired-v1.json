@@ -1,0 +1,17 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589022",
+  "event_type": "shop.kyc.expired",
+  "schema_version": 1,
+  "occurred_at": "2026-09-21T10:20:00Z",
+  "aggregate_type": "SHOP",
+  "aggregate_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+  "actor_user_id": null,
+  "payload": {
+    "shop_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589018",
+    "kyc_case_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0589023",
+    "expired_at": "2026-09-21T10:20:00Z",
+    "expired_documents": [
+      "BUSINESS_LICENSE"
+    ]
+  }
+}

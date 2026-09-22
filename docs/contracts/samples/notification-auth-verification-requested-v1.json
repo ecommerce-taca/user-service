@@ -1,0 +1,16 @@
+{
+  "event_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "schema_version": 1,
+  "command_type": "AUTH_VERIFICATION_REQUESTED",
+  "occurred_at": "2026-09-21T10:00:00Z",
+  "dedupe_key": "email-verification:01a0c3a5-e3e0-70ce-b5a1-ded9f0588018:token-id",
+  "user_id": "01a0c3a5-e3e0-70ce-b5a1-ded9f0588018",
+  "channel": "EMAIL",
+  "recipient": "user@example.com",
+  "template": "auth-email-verification-v1",
+  "data": {
+    "display_name": "Smoke Test User",
+    "verification_url": "https://taca.vn/verify?token=opaque-token",
+    "expires_in_minutes": 1440
+  }
+}

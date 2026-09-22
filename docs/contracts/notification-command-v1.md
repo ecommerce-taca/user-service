@@ -193,6 +193,23 @@ challenge_id
   }
 }
 ```
+## Sample Fixtures
+
+Sample Kafka message bodies are available under:
+
+```text
+docs/contracts/samples/
+```
+
+Notification command samples:
+
+| File | Command Type |
+|---|---|
+| `notification-auth-verification-requested-v1.json` | `AUTH_VERIFICATION_REQUESTED` |
+| `notification-password-reset-requested-v1.json` | `PASSWORD_RESET_REQUESTED` |
+| `notification-phone-otp-requested-v1.json` | `PHONE_OTP_REQUESTED` |
+
+These files represent Kafka record values only. Kafka headers and record keys are documented in this contract.
 
 ## Consumer Error Handling
 
