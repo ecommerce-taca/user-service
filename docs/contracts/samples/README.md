@@ -26,6 +26,12 @@ This folder contains sample Kafka message bodies for contract consumers.
 | `shop-status-changed-v1.json` | `shop.events.v1` |
 | `shop-kyc-expired-v1.json` | `shop.events.v1` |
 
+## DLQ
+
+| File | Topic |
+|---|---|
+| `auth-user-dlq-v1.json` | `auth-user.events.dlq.v1` |
+
 ## Notes
 
 These files represent Kafka record values only.
